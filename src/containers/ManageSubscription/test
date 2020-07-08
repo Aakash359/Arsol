@@ -1,0 +1,604 @@
+import React, { PureComponent } from "react";
+
+import {
+  View,
+  Dimensions,
+  Text,
+  StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl, Image, Modal, ScrollView
+} from 'react-native';
+
+import { connect } from "react-redux";
+import { Images, Config, Color } from '@common';
+const server = Config.SuitCRM;
+
+import { scale } from "react-native-size-matters";
+import { CommonActions } from '@react-navigation/native';
+
+
+const msg = Config.SuitCRM;
+import ArsolApi from '@services/ArsolApi';
+import { LogoSpinner } from '@components';
+import Snackbar from 'react-native-snackbar';
+import Carousel, { Pagination } from 'react-native-snap-carousel';
+
+const IS_IOS = Platform.OS === 'ios';
+const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
+
+function wp(percentage) {
+  const value = (percentage * viewportWidth) / 100;
+  return Math.round(value);
+}
+const slideHeight = viewportHeight * 0.36;
+const slideWidth = wp(75);
+const itemHorizontalMargin = wp(2);
+
+export const sliderWidth = viewportWidth;
+export const itemWidth = slideWidth + itemHorizontalMargin * 2;
+
+const entryBorderRadius = 8;
+class ManageSubscriptionScreen extends PureComponent {
+
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false,
+      activeIndex: 0,
+      prompt: false,
+      payCancel: false,
+      show_list: [],
+
+    }
+  }
+
+  componentDidMount() {
+    const { network } = this.props;
+    if (!network.isConnected) {
+      Snackbar.show({
+        text: msg.noInternet,
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: "red"
+      });
+    } else {
+      this.setState({ loading: true }, () => {
+        this.hit_subscription_Api()
+      })
+    }
+  }
+
+
+  hit_subscription_Api() {
+    const { network, user_id, user_type } = this.props
+
+    if (network.isConnected) {
+      ArsolApi.ManageSubscription_api(
+        user_id,
+        user_type)
+
+        .then(responseJson => {
+          console.log('ManageSubscription_api', responseJson);
+
+          if (responseJson.ok) {
+            this.setState({
+              loading: false,
+            });
+
+            if (responseJson.data != null) {
+              if (responseJson.data.hasOwnProperty('status')) {
+
+                if (responseJson.data.status == 'success') {
+
+                  if (responseJson.data.hasOwnProperty('data')) {
+                    if (responseJson.data.data.length > 0) {
+                      this.setState({
+                        show_list: responseJson.data.data
+                      })
+
+                    }
+
+                  }
+
+
+
+                } else if (responseJson.data.status == 'failed') {
+
+                  alert(responseJson.data.message)
+
+                } else {
+                  Snackbar.show({
+                    text: msg.servErr,
+                    duration: Snackbar.LENGTH_SHORT,
+                    backgroundColor: "red"
+                  });
+                }
+              } else {
+                Snackbar.show({
+                  text: msg.servErr,
+                  duration: Snackbar.LENGTH_SHORT,
+                  backgroundColor: "red"
+                });
+              }
+            } else {
+              Snackbar.show({
+                text: msg.servErr,
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: "red"
+              });
+            }
+          } else {
+            if (responseJson.problem == 'NETWORK_ERROR') {
+              Snackbar.show({
+                text: msg.netError,
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: Color.lgreen
+              });
+              this.setState({
+                loading: false,
+
+              });
+            } else if (responseJson.problem == 'TIMEOUT_ERROR') {
+              Snackbar.show({
+                text: msg.serTimErr,
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: Color.lgreen
+              });
+              this.setState({
+                loading: false,
+
+              });
+            } else {
+              Snackbar.show({
+                text: msg.servErr,
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: "red"
+              });
+              this.setState({
+                loading: false,
+
+              });
+            }
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          this.setState({
+            loading: false,
+
+          });
+        });
+    } else {
+      Snackbar.show({
+        text: msg.noInternet,
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: "red"
+      });
+    }
+  }
+
+
+
+  _renderItem = ({ item, index }) => {
+    return (
+      <View style={{
+        backgroundColor: item.bg,
+        height: '90%',
+
+        marginHorizontal: scale(5),
+        marginTop: scale(20)
+      }}>
+        <View style={{
+          height: "20%",
+          alignItems: 'center',
+          justifyContent: "center"
+        }}>
+          <Text style={{
+            color: "#fff",
+            fontWeight: "bold",
+            fontSize: scale(20),
+            textAlign: 'center'
+
+          }}
+            numberOfLines={2}
+          >{item.title}</Text>
+
+          <Text style={{
+            color: "#fff",
+            fontWeight: "bold",
+            fontSize: scale(20),
+
+
+          }}
+            numberOfLines={1}
+          >Rs. {item.rs}</Text>
+          <Text style={{
+            color: "#fff",
+            fontSize: scale(15),
+
+
+          }}
+            numberOfLines={1}
+          >Per organization/Year</Text>
+        </View>
+
+
+        <View style={{
+          backgroundColor: "#fff", height: "79.5%",
+          alignItems: 'center',
+          margin: scale(1),
+          padding: scale(5),
+
+        }}>
+
+          <Text style={{
+            marginVertical: scale(5),
+            color: "#000",
+            fontSize: scale(15),
+            textAlign: "center"
+          }}
+            numberOfLines={2}
+          >Unlimited Invoice upto {item.customer} Customers</Text>
+          <Text style={{
+            marginVertical: scale(5),
+            color: "#000",
+            fontSize: scale(15),
+          }}
+            numberOfLines={1}
+          > {item.user} User</Text>
+          <Text style={{
+            color: "#000",
+            fontSize: scale(15),
+            textAlign: "center"
+          }}
+            numberOfLines={2}
+          >Unlimited Receipt entry upto {item.customer} Customers</Text>
+
+          <Text style={{
+            marginVertical: scale(5),
+            color: "#000",
+            fontSize: scale(15),
+          }}
+            numberOfLines={1}
+          >Customer Support</Text>
+
+          <Text style={{
+            marginVertical: scale(5),
+            color: "#000",
+            fontSize: scale(15),
+          }}
+            numberOfLines={1}
+          >Free Updates</Text>
+
+          <Text style={{
+            marginVertical: scale(5),
+            color: "#000",
+            fontSize: scale(15),
+          }}
+            numberOfLines={1}
+          >GST Reports</Text>
+
+          <Text style={{
+            marginVertical: scale(5),
+            color: "#000",
+            fontSize: scale(15),
+          }}
+            numberOfLines={1}
+          >AR Reports</Text>
+
+          <TouchableOpacity
+            style={{
+              justifyContent: "center",
+              alignItems: 'center',
+              padding: scale(10),
+              backgroundColor: item.bg,
+              marginTop: scale(10),
+              borderRadius: scale(3)
+            }}
+            onPress={() => { item.btn_visibilty == true ? this.setState({ prompt: true }) : null }}>
+            <Text style={{
+              color: "#fff",
+              fontSize: scale(15),
+            }}
+              numberOfLines={1}
+            >{item.plan_id == 1 ? "Default" : item.btn_visibilty == true ? "Upgrade Now" : "Current Plan"}</Text>
+          </TouchableOpacity>
+
+        </View>
+
+
+
+      </View>
+
+    )
+  }
+
+  subscribeFunction() {
+    return (
+      <Modal
+        transparent={true}
+        animationType={'slide'}
+        visible={this.state.prompt}
+        onRequestClose={() => {
+          this.setState({ prompt: false });
+        }}>
+        <View style={{ flex: 1 }}>
+
+          <ScrollView style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: 'center',
+              alignItems: "center",
+              padding: scale(5)
+            }}
+            keyboardShouldPersistTaps="handled"
+          >
+
+            <View style={{
+              backgroundColor: 'white',
+              width: '80%',
+              padding: scale(10),
+              borderRadius: scale(5),
+              alignItems: 'center', justifyContent: 'center'
+            }}>
+              <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <Image source={Images.alert} style={{ width: scale(50), height: scale(50) }} />
+                <Text style={{ marginTop: scale(15), fontWeight: 'bold', fontSize: scale(20) }}>Are you sure ?</Text>
+                <Text style={{ marginTop: scale(5), fontSize: scale(12) }}>You will be redirected to payment page</Text>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginTop: scale(20)
+                }}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={{
+                    width: scale(100),
+                    height: scale(40),
+                    padding: scale(10),
+                    backgroundColor: '#3D8EE1',
+                    borderRadius: scale(8),
+                    margin: scale(5),
+                  }}
+                  onPress={() => {
+                    this.setState({
+                      prompt: false,
+                      payCancel: true
+
+                    });
+                  }}>
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: scale(15),
+                      textAlign: 'center',
+                    }}>
+                    No
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={{
+                    width: scale(100),
+                    height: scale(40),
+                    padding: scale(10),
+                    backgroundColor: '#3D8EE1',
+                    borderRadius: scale(8),
+                    margin: scale(5),
+                  }}
+                  // onPress={() => {
+                 
+                  // }}
+                  >
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: scale(15),
+                      textAlign: 'center',
+                    }}>
+                    {' '}
+                      Yes{' '}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+
+            </View>
+
+
+          </ScrollView>
+        </View>
+
+      </Modal>
+    );
+  }
+
+
+  paymentCancel() {
+    return (
+      <Modal
+        transparent={true}
+        animationType={'slide'}
+        visible={this.state.payCancel}
+        onRequestClose={() => {
+          this.setState({ payCancel: false });
+        }}>
+        <View style={{ flex: 1 }}>
+
+          <ScrollView style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: 'center',
+              alignItems: "center",
+              padding: scale(5)
+            }}
+            keyboardShouldPersistTaps="handled"
+          >
+
+            <View style={{
+              backgroundColor: 'white',
+              width: '80%',
+              padding: scale(10),
+              borderRadius: scale(5),
+              alignItems: 'center', justifyContent: 'center'
+            }}>
+              <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <Image source={Images.block} style={{ width: scale(50), height: scale(50) }} />
+                <Text style={{ marginTop: scale(15), fontWeight: 'bold', fontSize: scale(20) }}>Aborted</Text>
+                <Text style={{ marginTop: scale(5), fontSize: scale(12) }}>Your Request is aborted</Text>
+
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={{
+                    marginTop: scale(15),
+                    width: scale(100),
+                    height: scale(40),
+                    padding: scale(10),
+                    backgroundColor: '#3D8EE1',
+                    borderRadius: scale(8),
+                    margin: scale(5),
+                  }}
+                  onPress={() => {
+                    this.setState({
+                      payCancel: false,
+
+                    });
+                  }}>
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: scale(15),
+                      textAlign: 'center',
+                    }}>
+                    Ok
+                    </Text>
+                </TouchableOpacity>
+
+              </View>
+
+
+            </View>
+
+
+          </ScrollView>
+        </View>
+
+      </Modal>
+    );
+  }
+
+
+
+  render() {
+
+    return (
+      <View style={{
+        flex: 1,
+
+      }}>
+        <LogoSpinner loading={this.state.loading} />
+
+        <View style={{
+          height: '100%', backgroundColor: "#F1F3F6",
+        }}>
+          <View style={{ height: '90%' }}>
+            <Carousel
+              ref={c => this._slider1Ref = c}
+              layout={"default"}
+              ref={ref => this.carousel = ref}
+              data={this.state.show_list}
+              sliderWidth={sliderWidth}
+              itemWidth={itemWidth}
+              renderItem={this._renderItem}
+              onSnapToItem={activeIndex => this.setState({ activeIndex })}
+              inactiveSlideScale={0.94}
+              inactiveSlideOpacity={0.7}
+
+            />
+          </View>
+
+
+          <Pagination
+            dotsLength={this.state.show_list.length}
+            activeDotIndex={this.state.activeIndex}
+            containerStyle={styles.paginationContainer}
+            //dotColor= {this.state.show_list[this.state.activeIndex].bg}
+            dotStyle={styles.paginationDot}
+            inactiveDotColor={"#000"}
+            inactiveDotOpacity={0.4}
+            inactiveDotScale={0.6}
+            carouselRef={this._slider1Ref}
+            tappableDots={!!this._slider1Ref}
+
+
+          />
+        </View>
+
+        {this.subscribeFunction()}
+        {this.paymentCancel()}
+      </View>
+    );
+  }
+}
+
+
+
+const styles = StyleSheet.create({
+
+  txt: { fontSize: scale(15), width: scale(150), },
+  txth: { fontSize: scale(15), fontWeight: 'bold' },
+
+  paginationContainer: {
+    paddingVertical: scale(8),
+
+  },
+  paginationDot: {
+    width: scale(8),
+    height: scale(8),
+    borderRadius: scale(4),
+    marginHorizontal: scale(8)
+  }
+
+});
+
+
+
+ManageSubscriptionScreen.defaultProps = {
+  user_id: '',
+  user_type: ''
+}
+
+
+const mapStateToProps = (state) => {
+  return {
+
+
+    user_id: state.user.id,
+    user_type: state.user.type,
+    network: state.network,
+
+
+
+  };
+};
+
+
+export default connect(
+  mapStateToProps,
+  null
+)(ManageSubscriptionScreen);
+
+
+
+
+
+
+
+
+
+
+
+
+   export let ManageSubscription_post = (body) => api.post('/Customer/ManageSubscription', body).then(response => response)
