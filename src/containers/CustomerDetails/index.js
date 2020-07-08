@@ -18,7 +18,7 @@ const msg = Config.SuitCRM;
 import ArsolApi from '@services/ArsolApi';
 import { LogoSpinner } from '@components';
 import Snackbar from 'react-native-snackbar';
-
+import email from 'react-native-email';
 class CustomerDetailsScreen extends PureComponent {
 
 
@@ -247,7 +247,16 @@ class CustomerDetailsScreen extends PureComponent {
  
 
 
-
+  handleEmail = (email_id) => {
+    const to = [email_id] // string or array of email addresses
+    email(to, {
+      // Optional additional arguments
+      //   cc: ['bazzy@moo.com', 'doooo@daaa.com'], // string or array of email addresses
+      // bcc: 'mee@mee.com', // string or array of email addresses
+      //  subject: 'Show how to use',
+      // body: 'Some body right here'
+    }).catch(console.error)
+  }
 
   _renderListItem(rowData, index) {
     //console.log(rowData)
@@ -261,17 +270,24 @@ class CustomerDetailsScreen extends PureComponent {
       }}
         key={rowData.index}
       >
-        <Text style={{
-          padding: scale(10),
-          width: scale(120),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.company_name}</Text>
+      <TouchableOpacity
+        onPress={() => { 
+          this.props.navigation.navigate('Customer',
+           { Cust_id: rowData.item.customer_id }) 
+           }}>
+          <Text style={{
+            padding: scale(10),
+            width: scale(120),
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+            borderColor: '#ddd',
+            borderRightWidth: scale(1)
+          }}
+            numberOfLines={2}
+          >{rowData.item.company_name}</Text>
+      </TouchableOpacity>
+   
         <Text style={{
           padding: scale(10),
           width: scale(120),
@@ -294,17 +310,21 @@ class CustomerDetailsScreen extends PureComponent {
         }}
           numberOfLines={2}
         >{rowData.item.display_name}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.email_id}</Text>
+        <TouchableOpacity onPress={this.handleEmail.bind(this, rowData.item.email_id)}>
+
+          <Text style={{
+            padding: scale(10),
+            width: scale(100),
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+            borderColor: '#ddd',
+            borderRightWidth: scale(1)
+          }}
+            numberOfLines={2}
+          >{rowData.item.email_id}</Text>
+        </TouchableOpacity>
+        
        
         <View
           style={{

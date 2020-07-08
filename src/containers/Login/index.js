@@ -38,16 +38,28 @@ class LoginScreen extends PureComponent {
       focus:false,
 
       icEye: Images.eyeclose,
-      isPassword: true
+      isPassword: true,
+      ch_remember:false
      }
 
  }
 
  componentDidMount() {
+   const{email,pass,ch_remember}=this.props
+
+   console.log(email,pass,ch_remember)
+   this.setState({
+     username: email,
+     password: pass,
+     ch_remember: ch_remember
+   })
       
     this.props.logout();
+
     
   }
+
+  
   
 
  
@@ -77,16 +89,29 @@ this.setState({loading:false})
 
                      if(responseJson.data.hasOwnProperty("data")){
                          if(responseJson.data.data.length>0){
-                            this.props.login(responseJson.data.data[0]);
-                            this.props.navigation.dispatch(
-                                CommonActions.reset({
-                                  index: 0,
-                                  routes: [
-                                    { name: 'Main' },
+
+                          if(this.state.ch_remember)
+                          {
+                           
+                            this.props.remember(
+                              this.state.ch_remember,
+                               username,
+                                password)
+                          }else{
+                            this.props.remember(this.state.ch_remember, '', '')
+                          }
+                            
+                             
+                            // this.props.login(responseJson.data.data[0]);
+                            // this.props.navigation.dispatch(
+                            //     CommonActions.reset({
+                            //       index: 0,
+                            //       routes: [
+                            //         { name: 'Main' },
                                   
-                                  ],
-                                })
-                              );
+                            //       ],
+                            //     })
+                            //   );
                          }
                      }
 
@@ -325,16 +350,12 @@ return (
             }}
 
             onChangeText={username => this.setState({ username })}
-
+              returnKeyLabel={'next'}
           returnKeyType={'next'}
           onSubmitEditing={() => {
-            this.state.username.trim() != '' ?
-              this.secondTextInput.focus() :
-              Snackbar.show({
-                text: 'Enter Email',
-                duration: Snackbar.LENGTH_SHORT,
-                backgroundColor: Color.lgreen
-              });
+           
+              this.secondTextInput.focus() 
+             
           }}
           
 
@@ -382,7 +403,8 @@ return (
             value={password}
             underlineColorAndroid='transparent'
             autoFocus={false}
-            returnKeyType={'none'}
+            returnKeyLabel='done'
+            returnKeyType={'done'}
             onBlur={() => this.onBlurPass()}
             onFocus={() => this.onFocusPass()}
 
@@ -431,8 +453,13 @@ return (
 
 
               <Checkbox
+                checked={this.state.ch_remember}
                 label='Remember'
-                onChange={(checked) => console.log('Checked!')}
+                onChange={(val) => {
+                  console.log(val.checked )
+                  this.setState({ch_remember:val.checked})
+                  
+                }}
               />
 
           
@@ -447,7 +474,8 @@ return (
                 fontSize: scale(14),
                 color: "#000",
                 fontWeight: 'bold',
-                width: scale(150)
+                width: scale(150),
+                textAlignVertical:"center"
 
               }}
                 numberOfLines={1}>Forgot Password?</Text>
@@ -583,6 +611,8 @@ const styles = StyleSheet.create({
 
 LoginScreen.defaultProps = {
   id: "",
+  network:'',
+
  }
 
 
@@ -591,10 +621,11 @@ LoginScreen.defaultProps = {
   
   
       id: state.user.id,
+      email:state.user.email,
+      pass:state.user.pass,
+      ch_remember: state.user.ch_remember,
       network: state.network,
    
-
-
     };
   };
 
@@ -604,6 +635,7 @@ LoginScreen.defaultProps = {
     return {
       login: customers => dispatch(actions.login(customers)),
       logout: () => dispatch(actions.logout()),
+      remember: (c, u, p) => dispatch(actions.remember(c,u,p)),
     };
   };
 
