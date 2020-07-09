@@ -832,7 +832,34 @@ class CustomerLedgerScreen extends PureComponent {
     );
   };
 
+  renderHeader(){
+    const {data2}=this.state
+    var header_View =(
+      <View
+        style={{width:'100%',
+                alignItems:"center",
+                borderBottomColor:'#000',
+                borderBottomWidth:scale(1),
+                padding:scale(5)
+                }}
+      >
 
+
+            <Text style={{fontSize:scale(12),color:'#000',fontWeight:'bold'}}>{data2.company_name}</Text>
+            <Text style={{fontSize:scale(12),color:'#000',}}>{data2.cust_address}</Text>
+            <Text style={{fontSize:scale(12),color:'#000',}}>{data2.cust_zip}</Text>
+            <View style={{flexDirection:"row"}}>
+            <Text style={{fontSize:scale(12),color:'#000',}}>Ledger Account - </Text>
+            <Text style={{fontSize:scale(12),color:'#000',fontWeight:'bold'}}> {data2.ledger_account}</Text>
+            </View>
+
+           
+
+      </View>
+    )
+
+    return header_View;
+  }
 
    // 
    renderNext(){
@@ -1223,8 +1250,6 @@ const styles = StyleSheet.create({
     fontSize: scale(12),
   },
 });
-
-
 
 CustomerLedgerScreen.defaultProps = {
   user_id: '',
