@@ -102,16 +102,16 @@ this.setState({loading:false})
                           }
                             
                              
-                            // this.props.login(responseJson.data.data[0]);
-                            // this.props.navigation.dispatch(
-                            //     CommonActions.reset({
-                            //       index: 0,
-                            //       routes: [
-                            //         { name: 'Main' },
+                            this.props.login(responseJson.data.data[0]);
+                            this.props.navigation.dispatch(
+                                CommonActions.reset({
+                                  index: 0,
+                                  routes: [
+                                    { name: 'Main' },
                                   
-                            //       ],
-                            //     })
-                            //   );
+                                  ],
+                                })
+                              );
                          }
                      }
 
