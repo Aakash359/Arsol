@@ -892,96 +892,24 @@ class InvoiceReportScreen extends PureComponent {
 
   renderHeader() {
     return (
-      <View
+     <View
         style={{
-          height: scale(50), backgroundColor: "#80d4ff",
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 9,
-          },
-          shadowOpacity: 0.48,
-          shadowRadius: 11.95,
-
-          elevation: 20,
-          borderRadius: scale(15),
-          margin: scale(7),
+          backgroundColor: Color.bgColor,
+          borderRadius: scale(5),
           justifyContent: "center",
-          padding: scale(10)
-
+          alignItems: "center",
+          padding: scale(10),
+          width: scale(150),
+          alignSelf: 'center'
         }}
       >
+        <Text style={{
+          fontSize: scale(18),
+          color: '#000',
 
-        <View style={{ justifyContent: 'center', alignContent: 'center' }}>
-          <TouchableHighlight
-            activeOpacity={1}
-            underlayColor={'#ddd'}
-            onPress={() => this.props.navigation.toggleDrawer()}
-            style={{
-              width: scale(40), height: scale(40),
-              alignItems: "center",
-              justifyContent: 'center',
-              borderRadius: scale(20)
-            }}
-          >
-
-            <Image source={Images.menu} style={{
-              width: scale(20), height: scale(20),
-
-
-            }} />
-
-          </TouchableHighlight>
-
-          <Text style={{
-            position: "absolute",
-            alignSelf: "center",
-            fontSize: scale(18),
-            color: "#fff",
-            fontWeight: 'bold'
-          }}>Invoice Report</Text>
-          
-
-          <TouchableHighlight
-            activeOpacity={1}
-            underlayColor={'#ddd'}
-            onPress={() => { this.printHTML() }}
-            style={{
-              position: "absolute", right: 35, width: scale(40), height: scale(40),
-              alignItems: "center",
-              justifyContent: 'center',
-              borderRadius: scale(20)
-            }}
-          >
-
-            <Image source={Images.print} style={{
-              width: scale(20), height: scale(20),
-
-
-            }} />
-
-          </TouchableHighlight>
-
-          <TouchableHighlight
-            activeOpacity={1}
-            underlayColor={'#ddd'}
-            onPress={() => { this.setState({ filter: true }) }}
-            style={{
-              position: "absolute", right: 0, width: scale(40), height: scale(40),
-              alignItems: "center",
-              justifyContent: 'center',
-              borderRadius: scale(20)
-            }}
-          >
-
-            <Image source={Images.filterw} style={{
-              width: scale(20), height: scale(20),
-
-
-            }} />
-
-          </TouchableHighlight>
-        </View>
+        }}
+          numberOfLines={1}
+        >Invoice Report</Text>
 
       </View>
 
