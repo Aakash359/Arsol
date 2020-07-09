@@ -1,7 +1,6 @@
 import React, { PureComponent, Fragment } from "react";
 import {
-  View, TouchableHighlight, Dimensions,ImageBackground
-  , Animated,
+  View, TouchableHighlight, TouchableWithoutFeedback, Animated,
 
   Text, Modal, ScrollView, TextInput, PermissionsAndroid,
   StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl, Image, ActivityIndicator
@@ -48,22 +47,20 @@ class InvoiceReportScreen extends PureComponent {
       onEndReachedCalledDuringMomentum: true,
       page: 0,
       show_list: [],
-
+      filter: false,
       display_name: '',
       invoice_number: '',
-      ch_all: false,
-      ch_invoice:true,
+      ch_all: true,
+      ch_invoice: false,
       ch_invoice_no: false,
       ch_display_name: false,
       start_date: moment(new Date()).format('DD/MM/YYYY'),
       end_date: moment(new Date()).format('DD/MM/YYYY'),
 
 
+      pdf_data: [],
 
-
-
-
-       filter_type:1
+      activeSections: [],
 
     }
 
@@ -72,42 +69,22 @@ class InvoiceReportScreen extends PureComponent {
   componentDidMount() {
     const { network } = this.props;
 
-    this._subscribe = this.props.navigation.addListener('focus', () => {
-      if (!network.isConnected) {
-        Snackbar.show({
-          text: msg.noInternet,
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: "red"
-        });
-      } else {
-        this.setState({ loading: true,
-          refresh: false,
-          load_more: false,
-          onEndReachedCalledDuringMomentum: true,
-          page: 0,
-          show_list: [],
-  
-          display_name: '',
-          invoice_number: '',
-          ch_all: false,
-          ch_invoice: true,
-          ch_invoice_no: false,
-          ch_display_name: false,
-          start_date: moment(new Date()).format('DD/MM/YYYY'),
-          end_date: moment(new Date()).format('DD/MM/YYYY'),
 
-         filter_type: 1
-        
-        }, () => {
+    if (!network.isConnected) {
+      Snackbar.show({
+        text: msg.noInternet,
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: "red"
+      });
+    } else {
+      this.setState({ loading: true }, () => {
 
 
 
-          this.hit_invoicereportsApi()
+        this.hit_invoicereportsApi()
 
-        })
-      }
-    })
-  
+      })
+    }
   }
 
   renderTableHeader() {
@@ -329,7 +306,7 @@ class InvoiceReportScreen extends PureComponent {
   }
 
   _checkbox_fun(val) {
-    if (val == "0") {
+    if (val.label == "All") {
       this.setState({
         ch_all: true,
         ch_invoice: false,
@@ -340,7 +317,7 @@ class InvoiceReportScreen extends PureComponent {
         start_date: moment(new Date()).format('DD/MM/YYYY'),
         end_date: moment(new Date()).format('DD/MM/YYYY'),
       })
-    } else if (val == "1") {
+    } else if (val.label == "Invoice Date") {
       this.setState({
         ch_all: false,
         ch_invoice: true,
@@ -351,7 +328,7 @@ class InvoiceReportScreen extends PureComponent {
 
       })
     }
-    else if (val == "2") {
+    else if (val.label == "Invoice Number") {
       this.setState({
         ch_all: false,
         ch_invoice: false,
@@ -363,7 +340,7 @@ class InvoiceReportScreen extends PureComponent {
         end_date: moment(new Date()).format('DD/MM/YYYY'),
       })
     }
-    else if (val == "3") {
+    else if (val.label == "Customer Name") {
       this.setState({
         ch_all: false,
         ch_invoice: false,
@@ -377,6 +354,219 @@ class InvoiceReportScreen extends PureComponent {
     }
   }
 
+  _filterRender() {
+    const { ch_display_name, ch_invoice, ch_invoice_no, ch_all } = this.state;
+    return (
+      <Modal
+        transparent={true}
+        animationType={'slide'}
+        visible={this.state.filter}
+        onRequestClose={() => {
+          this.setState({ filter: false });
+        }}>
+        <View style={{ flex: 1 }}>
+
+
+
+          <ScrollView style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: 'center',
+              alignItems: "center",
+              padding: scale(5)
+            }}
+            enableOnAndroid={true}
+            keyboardShouldPersistTaps="handled"
+          >
+
+
+            <View>
+
+
+              <View style={{
+                backgroundColor: 'white',
+                borderRadius: scale(5),
+                width: scale(250),
+
+              }}>
+                <View style={{
+                  height: scale(40),
+                  justifyContent: 'center', alignItems: 'center'
+                }}>
+                  <Text style={{ fontSize: scale(15), color: "#00B5FF", fontWeight: '500' }}
+                    numberOfLines={1}
+                  >Filter Search Result</Text>
+                </View>
+
+                <View style={{ height: scale(2), backgroundColor: "#00B5FF", }} />
+
+                <View style={{ padding: scale(5) }}>
+                  <Checkbox
+                    label='All'
+                    checked={ch_all}
+                    onChange={(checked) => this._checkbox_fun(checked)}
+                    labelStyle={{ fontSize: scale(15), }}
+                    checkboxStyle={{ width: scale(30), height: scale(30) }}
+
+                  />
+                  <Checkbox
+                    label='Invoice Date'
+                    checked={ch_invoice}
+                    onChange={(checked) => this._checkbox_fun(checked)}
+                    labelStyle={{ fontSize: scale(15), }}
+                    checkboxStyle={{ width: scale(30), height: scale(30) }}
+
+                  />
+                  {
+                    ch_invoice ?
+                      <View>
+                        <DatePicker
+                          style={{ width: scale(200), marginTop: scale(10) }}
+                          date={this.state.start_date}
+                          placeholder="Select Start Date"
+                          mode={'date'}
+                          format="DD/MM/YYYY"
+                          confirmBtnText="Confirm"
+                          cancelBtnText="Cancel"
+                          showIcon={false}
+                          customStyles={{
+                            dateIcon: {
+                              position: 'absolute',
+                              left: scale(0),
+                              top: scale(4),
+                              marginLeft: scale(0)
+                            },
+                            dateInput: {
+                              marginLeft: scale(36),
+
+                            },
+                            placeholderText: {
+                              color: '#565656'
+                            }
+                          }}
+                          minuteInterval={10}
+                          onDateChange={(date) => { this.setState({ start_date: date }) }}
+
+                        />
+                        <DatePicker
+                          style={{ width: scale(200), marginTop: scale(10) }}
+                          date={this.state.end_date}
+                          placeholder="Select End Date"
+                          mode={'date'}
+                          format="DD/MM/YYYY"
+                          confirmBtnText="Confirm"
+                          cancelBtnText="Cancel"
+                          showIcon={false}
+                          customStyles={{
+                            dateIcon: {
+                              position: 'absolute',
+                              left: scale(0),
+                              top: scale(4),
+                              marginLeft: scale(0)
+                            },
+                            dateInput: {
+                              marginLeft: scale(36),
+
+                            },
+                            placeholderText: {
+                              color: '#565656'
+                            }
+                          }}
+                          minuteInterval={10}
+                          onDateChange={(date) => { this.setState({ end_date: date }) }}
+
+                        />
+                      </View>
+                      : null
+                  }
+
+
+                  <Checkbox
+                    label='Invoice Number'
+                    checked={ch_invoice_no}
+                    onChange={(checked) => this._checkbox_fun(checked)}
+                    labelStyle={{ fontSize: scale(15), }}
+                    checkboxStyle={{ width: scale(30), height: scale(30) }}
+                  />
+                  {
+                    ch_invoice_no ?
+                      <View style={styles.userInput}>
+                        <TextInput
+                          placeholder='Number'
+                          style={styles.input}
+                          autoCorrect={false}
+                          autoCapitalize={'none'}
+                          underlineColorAndroid="transparent"
+                          onChangeText={invoice_number => this.setState({ invoice_number })}
+                          value={this.state.invoice_number}
+                        />
+                      </View> : null
+                  }
+
+                  <Checkbox
+                    label='Customer Name'
+                    checked={ch_display_name}
+                    onChange={(checked) => this._checkbox_fun(checked)}
+                    labelStyle={{ fontSize: scale(15), }}
+                    checkboxStyle={{ width: scale(30), height: scale(30) }}
+
+                  />
+                  {ch_display_name ?
+                    <View style={styles.userInput}>
+                      <TextInput
+                        placeholder='Name'
+                        style={styles.input}
+                        autoCorrect={false}
+                        autoCapitalize={'none'}
+                        underlineColorAndroid="transparent"
+                        onChangeText={display_name => this.setState({ display_name })}
+                        value={this.state.display_name}
+                      />
+                    </View> : null
+                  }
+                </View>
+
+
+
+
+
+                <TouchableOpacity
+                  onPress={() => {
+                    this.setState({ filter: false }, () => {
+                      this.onRefresh()
+                    })
+                  }}
+                >
+                  <View style={{
+                    backgroundColor: "#00B5FF", height: scale(40), alignItems: "center",
+                    justifyContent: 'center',
+                    borderRadius: scale(4),
+
+                  }}>
+                    <Text style={{ fontSize: scale(18), color: "#fff", fontWeight: 'bold' }}
+                      numberOfLines={1}
+                    >Apply</Text>
+                  </View>
+                </TouchableOpacity>
+
+
+
+
+
+
+
+
+              </View>
+
+
+
+            </View>
+          </ScrollView>
+        </View>
+
+      </Modal>
+    )
+  }
 
   //refresh
   onRefresh() {
@@ -407,7 +597,6 @@ class InvoiceReportScreen extends PureComponent {
     const { user_id, user_type } = this.props
     const { page, start_date, end_date, invoice_number, display_name } = this.state
     var filter_type = this.filter_fun()
-     this.setState({filter_type:filter_type})
     ArsolApi.InvoiceReports_api(user_id, user_type,
       filter_type,
       start_date,
@@ -520,8 +709,139 @@ class InvoiceReportScreen extends PureComponent {
       });
   }
 
- 
+  async printHTML(html_content) {
+    await RNPrint.print({
+      html: html_content
+    })
+  }
 
+  //Reprint Invoice View Api
+
+  hit_Reprint(invoice_id) {
+    const { user_id, user_type, } = this.props
+    const { page, start_date, end_date, invoice_number, display_name } = this.state
+    ArsolApi.Reprint_post_api(user_id, user_type,
+
+    )
+
+      .then(responseJson => {
+        console.log('Reprint_post_api', responseJson);
+
+        if (responseJson.ok) {
+          this.setState({
+            loading: false,
+            refresh: false
+          });
+
+          if (responseJson.data != null) {
+            if (responseJson.data.hasOwnProperty('status')) {
+
+              if (responseJson.data.status == 'success') {
+                if (responseJson.data.hasOwnProperty('message')) {
+
+                  Snackbar.show({
+                    text: responseJson.data.message,
+                    duration: Snackbar.LENGTH_SHORT,
+                    backgroundColor: Color.lgreen
+                  });
+
+                  if (responseJson.data.hasOwnProperty("data")) {
+                    if (responseJson.data.data.length > 0) {
+                      // Works on both Android and iOS
+                      Alert.alert(
+                        'New Estimate',
+                        responseJson.data.message,
+                        [
+
+                          {
+                            text: 'Cancel',
+                            onPress: () => console.log('Cancel Pressed'),
+                            style: 'cancel'
+                          },
+                          {
+                            text: 'Print', onPress: () => {
+
+                              this.printHTML(responseJson.data.data[0].html)
+                            }
+                          }
+                        ],
+                        { cancelable: false }
+                      );
+
+                    }
+                  }
+
+                }
+              } else if (responseJson.data.status == 'failed') {
+                if (responseJson.data.hasOwnProperty('message')) {
+
+
+
+                  alert(responseJson.data.message)
+                }
+              } else {
+                Snackbar.show({
+                  text: msg.servErr,
+                  duration: Snackbar.LENGTH_SHORT,
+                  backgroundColor: "red"
+                });
+              }
+            } else {
+              Snackbar.show({
+                text: msg.servErr,
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: "red"
+              });
+            }
+          } else {
+            Snackbar.show({
+              text: msg.servErr,
+              duration: Snackbar.LENGTH_SHORT,
+              backgroundColor: "red"
+            });
+          }
+        } else {
+          if (responseJson.problem == 'NETWORK_ERROR') {
+            Snackbar.show({
+              text: msg.netError,
+              duration: Snackbar.LENGTH_SHORT,
+              backgroundColor: Color.lgreen
+            });
+            this.setState({
+              loading: false,
+              refresh: false
+            });
+          } else if (responseJson.problem == 'TIMEOUT_ERROR') {
+            Snackbar.show({
+              text: msg.serTimErr,
+              duration: Snackbar.LENGTH_SHORT,
+              backgroundColor: Color.lgreen
+            });
+            this.setState({
+              loading: false,
+              refresh: false
+            });
+          } else {
+            Snackbar.show({
+              text: msg.servErr,
+              duration: Snackbar.LENGTH_SHORT,
+              backgroundColor: "red"
+            });
+            this.setState({
+              loading: false,
+              refresh: false
+            });
+          }
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        this.setState({
+          loading: false,
+          refresh: false
+        });
+      });
+  }
 
   //scroll
   _onMomentumScrollBegin = () => this.setState({
@@ -560,395 +880,19 @@ class InvoiceReportScreen extends PureComponent {
 
 
 
-
-  
-
-
-  _renderListItem(rowData, index) {
-    //console.log(rowData)
-    return (
-
-      <View style={{
-        flexDirection: 'row',
-        borderWidth: scale(0.5),
-        borderColor: '#ccc'
-
-      }}
-        key={rowData.index}
-      >
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_date}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_no}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_dis_name}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_gst}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_taxable}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_igst}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_cgst}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_sgst}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.total_amount}</Text>
-        
-        <View
-          style={{
-            padding: scale(10),
-            width: scale(100),
-            alignItems: "center",
-            justifyContent: "center",
-            borderColor: '#ddd',
-            borderRightWidth: scale(1)
-          }}
-        >
-
-          <TouchableOpacity
-            style={{
-              backgroundColor: Color.btn,
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: scale(5),
-              height: scale(30),
-              width: scale(40),
-
-
-            }}
-            onPress={() => { this.props.navigation.navigate('InvoiceReportDetail') }}
-         >
-            <Text style={{ color: "#fff", fontSize: scale(10) }}>View</Text>
-          </TouchableOpacity>
-
-        </View>
-
-        <View
-          style={{
-            padding: scale(10),
-            width: scale(100),
-            alignItems: "center",
-            justifyContent: "center"
-          }}
-        >
-
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#0095DF",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: scale(5),
-              height: scale(30),
-              width: scale(60),
-
-
-            }}
-            onPress={() => {
-              this.props.navigation.navigate('InvoiceOne', {
-                EditId: rowData.item.in_id
-              })
-            }}
-          >
-            <Text style={{ color: "#fff", fontSize: scale(10) }}>Re-print</Text>
-          </TouchableOpacity>
-
-        </View>
-
-
-
-
-      </View>
-
-
-
-
-
-
-    )
-  }
-
-
-  
-
-
-
- 
-
   //footer
   renderFooter = () => {
-    if (!this.state.load_more) return (
-
-      <View>
-        {
-          this.state.show_list.length > 0 ?
-
-            <View style={{
-              flexDirection: 'row',
-
-              borderWidth: scale(0.5),
-              borderColor: '#ccc',
-              backgroundColor: '#fff'
-            }}>
-              <Text style={{
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              ></Text>
-
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1),
-                textAlign: 'right'
-              }}
-                numberOfLines={2}
-              >Total:</Text>
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              ></Text>
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              ></Text>
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_taxable), 0)}</Text>
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_igst), 0)}</Text>
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_cgst), 0)}</Text>
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_sgst), 0)}</Text>
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.total_amount), 0)}</Text>
-             
-
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              ></Text>
-
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-
-              }}
-                numberOfLines={2}
-              ></Text>
-
-
-            </View>
-
-
-
-            : <View style={{ marginBottom: scale(100), }} />
-        }
-
-      </View>
-
-
-    )
-
+    if (!this.state.load_more) return <View style={{ marginBottom: scale(100), }}></View>;
     return (
-      <View style={{
-        marginBottom: scale(100),
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start',
-      }}>
-        <ActivityIndicator size="small" color="#ddd" />
+      <View style={{ marginTop: scale(10), }}>
+        <ActivityIndicator size="large" color="#ddd" />
       </View>
     );
   };
 
-
   renderHeader() {
     return (
-      <View
+     <View
         style={{
           backgroundColor: Color.bgColor,
           borderRadius: scale(5),
@@ -968,647 +912,470 @@ class InvoiceReportScreen extends PureComponent {
         >Invoice Report</Text>
 
       </View>
+
     )
   }
 
-  renderTitle() {
+  _handleAdd(item) {
+    const { navigation, network } = this.props;
+
+
+    if (item == 'print') {
+      this.printHTML()
+
+    } else if (item == 'export') {
+      if (this.state.show_list.length > 0) {
+        this.requestRunTimePermission()
+      } else {
+        alert("No Record Found")
+      }
+    }
+
+    if (network.isConnected) {
+
+    } else {
+      Snackbar.show({
+        text: msg.noInternet,
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: "red"
+      });
+    }
+  }
+
+  renderFOB() {
+
     return (
-      <View style={{
-        flexDirection: 'row',
-
-        borderWidth: scale(0.5),
-        borderColor: '#ccc',
-        backgroundColor: '#fff'
-      }}>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >Invoice Date</Text>
-
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >Invoice Number</Text>
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >Customer Name</Text>
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >Customer GSTIN</Text>
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >Taxable Value</Text>
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >IGST</Text>
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >CGST</Text>
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >SGST</Text>
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >Total Invoice Value (INR)</Text>
-       
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
+      <TouchableOpacity activeOpacity={0.5}
+        style={{
+          position: 'absolute',
+          width: scale(50),
+          height: scale(50),
+          alignItems: 'center',
+          justifyContent: 'center',
+          right: 50,
+          bottom: 100,
+          backgroundColor: "#fff",
+          borderRadius: scale(25),
+          elevation: 20,
+          shadowColor: "#000000",
+          shadowOpacity: 0.8,
+          shadowRadius: 2,
+          shadowOffset: {
+            height: 1,
+            width: 0
+          }
 
         }}
-          numberOfLines={2}
-        ></Text>
-
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
+        onPress={() => {
+          if (this.state.show_list.length > 0) {
+            this.requestRunTimePermission()
+          } else {
+            alert("No Record Found")
+          }
 
         }}
-          numberOfLines={2}
-        ></Text>
+      >
 
+        <Image source={Images.excel}
 
-      </View>
-    )
+          style={{
+            resizeMode: 'contain',
+            width: 50,
+            height: 50,
+          }} />
+
+      </TouchableOpacity>
+    );
   }
 
 
-
-  render() {
-    const { ch_display_name, ch_invoice, ch_invoice_no, ch_all,
-       invoice_number, display_name,filter_type } = this.state;
+  //=================================================
 
 
+  setSections = sections => {
+    this.setState({
+      activeSections: sections.includes(undefined) ? [] : sections,
+    });
+  };
 
+  renderShow = (section, _, isActive) => {
     return (
-      <View>
-        <ImageBackground
-          style={[styles.fixed, styles.containter]}
-          source={Images.listbg}>
+      <Animatable.View
+        duration={400}
+        style={
+          isActive ? styles.active : styles.inactive}
+      //  transition="backgroundColor"
+      >
+        <TouchableOpacity
+          // key={index}
+          onPress={() => { this.props.navigation.navigate('InvoiceReportDetail') }}>
+          <Text style={{
+            fontSize: scale(14), fontWeight: 'bold', fontStyle: 'italic',
+            textTransform: 'capitalize'
+          }}
+            numberOfLines={1}
+          >{section.in_dis_name}</Text>
+        </TouchableOpacity>
+        <Text style={styles.txt}
+          numberOfLines={1}
+        >Invoice Number:{section.in_no}</Text>
+
         <TouchableHighlight
           activeOpacity={1}
           underlayColor={'#ddd'}
-          onPress={() =>
-            this.props.navigation.toggleDrawer()}
+
+
+          onPress={() => {
+            this.hit_Reprint()
+
+          }}
+
           style={{
-            width: scale(35), height: scale(35),
+            width: scale(40), height: scale(40),
             alignItems: "center",
             justifyContent: 'center',
-            backgroundColor: Color.headerTintColor
+            borderRadius: scale(20),
+            position: 'absolute',
+            right: 0,
+            bottom: 0
           }}
         >
-          <Image source={Images.menu}
-            style={{
-              width: scale(20),
-              height: scale(20),
-            }} />
+
+          <Image source={Images.printer} style={{
+            width: scale(20), height: scale(20),
+          }} />
+
         </TouchableHighlight>
 
-        {this.renderHeader()}
 
-        <LogoSpinner loading={this.state.loading} />
+      </Animatable.View>
+    );
+  };
+
+  renderContent(section, _, isActive) {
+    return (
+      <View>
+        {
+          isActive ? <Animatable.View
+            duration={400}
+
+            style={
+              isActive ? styles.activeContent : styles.inactiveContent}>
+            <Animatable.Text style={styles.txt}
+              animation={isActive ? 'bounceIn' : undefined}
+            >
+              {"Invoice Date:" + section.in_date.replace("T00:00:00", "")}
+            </Animatable.Text>
+
+
+            <Animatable.Text style={styles.txt}
+              numberOfLines={1}
+              animation={isActive ? 'bounceIn' : undefined}
+            >Customer GSTIN:{section.in_gst}</Animatable.Text>
 
 
 
-        <View
-          style={{
-            padding: scale(10),
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 9,
-            },
-            shadowOpacity: 0.48,
-            shadowRadius: 11.95,
+            <Animatable.Text style={styles.txt}
+              numberOfLines={1}
+              animation={isActive ? 'bounceIn' : undefined}
+            >Taxable Value:{section.in_taxable}</Animatable.Text>
 
-            elevation: 20,
-            borderRadius: scale(15),
-            backgroundColor: "#fff",
-            marginHorizontal: scale(10),
-            marginVertical: scale(20),
-            height: '70%'
-          }}
 
-        >
-          <View style={{
-            borderWidth: 1,
-            height: '100%',
-            borderColor: '#ccc',
-            borderRadius: scale(5),
-            paddingBottom: scale(5)
 
-          }}>
-            <View
+            <Animatable.Text style={styles.txt}
+              numberOfLines={1}
+              animation={isActive ? 'bounceIn' : undefined}
+            >IGST:{section.in_igst}</Animatable.Text>
+
+
+
+            <Animatable.Text style={styles.txt}
+              numberOfLines={1}
+              animation={isActive ? 'bounceIn' : undefined}
+            >CGST:{section.in_cgst}</Animatable.Text>
+
+
+            <Animatable.Text style={styles.txt}
+              numberOfLines={1}
+              animation={isActive ? 'bounceIn' : undefined}
+            >SGST:{section.in_sgst}</Animatable.Text>
+
+
+
+            <Animatable.Text style={styles.txt}
+              numberOfLines={1}
+              animation={isActive ? 'bounceIn' : undefined}
+            >Total Invoice Value (INR):{section.total_amount}</Animatable.Text>
+
+            <TouchableHighlight
+              activeOpacity={1}
+              underlayColor={'#ddd'}
+
+
+              // onPress={() => {
+              //   this.props.navigation.navigate('InvoiceOne', {
+              //     EditId: section.in_id
+              //   })
+              // }}
+
               style={{
-                padding: scale(5),
-                backgroundColor: '#f1f3f6'
+                width: scale(40), height: scale(40),
+                alignItems: "center",
+                justifyContent: 'center',
+                borderRadius: scale(20),
+                position: 'absolute',
+                right: 0,
+                bottom: 30
               }}
             >
 
-              <View style={{
-                flexDirection: 'row',
-                marginVertical: scale(5),
-                alignItems: "center"
-
-              }}>
-                <Text style={{
-                  fontSize: scale(12),
-                  fontWeight: 'bold',
-                  width: scale(50)
-                }}
-                  numberOfLines={2}
-                >Search Option:</Text>
-
-                <TouchableOpacity>
-                  <Text
-                    style={{
-                      padding: scale(5),
-                      borderColor: '#000',
-                      borderWidth: scale(1),
-
-                      textAlign: 'center',
-
-                      fontSize: scale(10),
-                      backgroundColor: ch_all ? Color.headerTintColor : '#ccc',
-
-                      borderRadius: scale(5),
-                      color: ch_all ? '#fff' : '#000',
-                      marginLeft: scale(5)
-                    }}
-                    numberOfLines={1}
-                    onPress={() => { this._checkbox_fun(0) }}
-                  >All</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity>
-                  <Text
-                    style={{
-                      padding: scale(5),
-                      borderColor: '#000',
-                      borderWidth: scale(1),
-
-                      textAlign: 'center',
-
-                      fontSize: scale(10),
-                      backgroundColor: ch_invoice ? Color.headerTintColor : '#ccc',
-                      color: ch_invoice ? '#fff' : '#000',
-                      maxWidth: scale(100),
-                      borderRadius: scale(5),
-                      marginLeft: scale(5)
-
-                    }}
-                    numberOfLines={1}
-                    onPress={() => { this._checkbox_fun(1) }}
-
-                  >Invoice Date</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity>
-                  <Text
-                    style={{
-                      padding: scale(5),
-                      borderColor: '#000',
-                      borderWidth: scale(1),
-
-                      textAlign: 'center',
-
-                      fontSize: scale(10),
-                      backgroundColor: ch_invoice_no ? Color.headerTintColor : '#ccc',
-                      color: ch_invoice_no ? '#fff' : '#000',
-                      maxWidth: scale(100),
-                      borderRadius: scale(5),
-                      marginLeft: scale(5)
-
-                    }}
-                    numberOfLines={1}
-                    onPress={() => { this._checkbox_fun(2) }}
-                  >Invoice Number</Text>
-                </TouchableOpacity>
-
-
-              </View>
-
-              <TouchableOpacity>
-                <Text
-                  style={{
-                    padding: scale(5),
-                    borderColor: '#000',
-                    borderWidth: scale(1),
-
-                    textAlign: 'center',
-
-                    fontSize: scale(10),
-                    backgroundColor: ch_display_name ? Color.headerTintColor : '#ccc',
-                    color: ch_display_name ? '#fff' : '#000',
-                    width: scale(150),
-                    borderRadius: scale(5)
-
-                  }}
-                  numberOfLines={1}
-                  onPress={() => { this._checkbox_fun(3) }}
-                >Customer Name</Text>
-              </TouchableOpacity>
-
-              <View style={{
-                flexDirection: 'row',
-                marginTop: scale(5),
-
-                alignItems: "center"
-              }}>
-
-                {
-                  ch_invoice ?
-                    <View style={{ flexDirection: "row", }}>
-                      <DatePicker
-                        style={{ width: scale(100), }}
-                        date={this.state.start_date}
-                        placeholder="Select Start Date"
-                        mode={'date'}
-                        format="DD/MM/YYYY"
-                        confirmBtnText="Confirm"
-                        cancelBtnText="Cancel"
-                        showIcon={false}
-                        minuteInterval={10}
-                        onDateChange={(date) => { this.setState({ start_date: date }) }}
-
-                      />
-                      <DatePicker
-                        style={{ width: scale(100), marginLeft: scale(5) }}
-                        date={this.state.end_date}
-                        placeholder="Select End Date"
-                        mode={'date'}
-                        format="DD/MM/YYYY"
-                        confirmBtnText="Confirm"
-                        cancelBtnText="Cancel"
-                        showIcon={false}
-                        minuteInterval={10}
-                        onDateChange={(date) => { this.setState({ end_date: date }) }}
-
-                      />
-                    </View>
-                    : null
-                }
-
-                {
-                  ch_invoice_no ?
-                    <View style={styles.userInput}>
-                      <TextInput
-                        placeholder='Number'
-                        style={styles.input}
-                        autoCorrect={false}
-                        autoCapitalize={'none'}
-                        underlineColorAndroid="transparent"
-                        onChangeText={invoice_number => this.setState({ invoice_number })}
-                        value={invoice_number}
-                      />
-                    </View> : null
-                }
-
-                {ch_display_name ?
-                  <View style={styles.userInput}>
-                    <TextInput
-                      placeholder='Name'
-                      style={styles.input}
-                      autoCorrect={false}
-                      autoCapitalize={'none'}
-                      underlineColorAndroid="transparent"
-                      onChangeText={display_name => this.setState({ display_name })}
-                      value={display_name}
-                    />
-                  </View> : null
-                }
-
-
-
-
-
-
-                <TouchableOpacity
-                  onPress={() => {
-                    this.onRefresh()
-                  }}
-
-                >
-                  <Text style={{
-                    textAlign: 'center',
-                    fontSize: scale(10),
-                    padding: scale(5),
-                    maxWidth: scale(100),
-                    backgroundColor: '#0095DF',
-                    borderRadius: scale(5),
-                    color: '#fff',
-                    marginLeft: scale(10),
-                    height: scale(40),
-                    textAlignVertical: "center",
-                    minWidth: scale(60)
-                  }}
-                    numberOfLines={1}
-                  >Search</Text>
-                </TouchableOpacity>
-              </View>
-
-
-              <Text
-                style={{
-                  fontSize: scale(12),
-                  width: scale(300),
-                  marginVertical: scale(5)
-                }}
-                numberOfLines={1}
-              >Report For:
-              {filter_type==0 ? "All Records" :
-                  filter_type==1 ? "Date between " + this.state.start_date + " and " + this.state.end_date :
-                    filter_type==2 ? "Invoice number " + invoice_number :
-                      filter_type==3 ? "Customer name " + display_name :
-                        ""
-                }
-              </Text>
-
-
-
-
-
-
-
-            </View>
-
-
-
-
-
-            <ScrollView horizontal={true}>
-              <FlatList
-
-                ListHeaderComponent={this.renderTitle.bind(this)}
-                stickyHeaderIndices={[0]}
-                contentContainerStyle={{
-                  paddingBottom: scale(5),
-                  flexGrow: 1,
-                }}
-                keyExtractor={(item, index) => index.toString()}
-                data={this.state.show_list}
-
-                renderItem={(item, index) => this._renderListItem(item, index)}
-                bounces={false}
-                extraData={this.state}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={this.state.refresh}
-                    onRefresh={this.onRefresh.bind(this)}
-                  />
-
-
-                }
-                ListEmptyComponent={
-                  <View style={{
-                    borderWidth: scale(0.5),
-                    borderColor: '#ccc'
-
-                  }}>
-                    {this.state.loading == false ? (
-                      <Text style={{
-                        padding: scale(10),
-                        fontSize: scale(12),
-                        textAlignVertical: 'center',
-                        color: '#ccc'
-
-
-                      }}>No Data Found..!!</Text>
-                    ) : null}
-                  </View>
-                }
-                //pagination
-
-                ListFooterComponent={this.renderFooter.bind(this)}
-                onEndReachedThreshold={0.01}
-                onMomentumScrollBegin={() => this._onMomentumScrollBegin()}
-                onEndReached={this.handleLoadMore.bind(this)}
-                onScroll={this._onScroll}
-              />
-
-            </ScrollView>
-
-
-
-
-
-
-
-
-
+              <Image source={Images.eye} style={{
+                width: scale(20), height: scale(20),
+              }} />
+
+            </TouchableHighlight>
+
+
+            <TouchableHighlight
+              activeOpacity={1}
+              underlayColor={'#ddd'}
+
+
+              // onPress={() => {
+              //   this.props.navigation.navigate('InvoiceOne', {
+              //     EditId: section.in_id
+              //   })
+              // }}
+
+              style={{
+                width: scale(40), height: scale(40),
+                alignItems: "center",
+                justifyContent: 'center',
+                borderRadius: scale(20),
+                position: 'absolute',
+                right: 0,
+                bottom: 0
+              }}
+            >
+
+              <Image source={Images.print} style={{
+                width: scale(20), height: scale(20),
+              }} />
+
+            </TouchableHighlight>
+          </Animatable.View> : null
+        }
+      </View>
+
+
+
+    );
+  }
+
+
+  renderNext() {
+    const { show_list, customer_type } = this.state
+
+
+    var footer_View = (
+      <View style={{ backgroundColor: 'transparent' }}>
+        <View
+          style={{
+            width: '94%',
+            alignSelf: 'center',
+
+            borderTopWidth: 0.8,
+            borderLeftWidth: 0.8,
+            borderRightWidth: 0.8,
+            borderTopLeftRadius: scale(7),
+            borderTopRightRadius: scale(7),
+            borderColor: 'grey',
+            padding: scale(3),
+
+
+          }}>
+          <Text style={{ fontSize: scale(12), color: '#000', fontWeight: '700' }}>  Total custmer {customer_type}</Text>
+
+          <View style={{ marginLeft: scale(20) }}>
+            <Text style={{ fontSize: scale(12), color: '#000' }}>
+              Texable Value:{show_list.reduce((prev, next) =>
+                prev + parseInt(next.in_taxable), 0)} </Text>
+            <Text style={{ fontSize: scale(12), color: '#000' }}>
+              IGST:{show_list.reduce((prev, next) =>
+                prev + parseInt(next.in_igst), 0)} </Text>
+            <Text style={{ fontSize: scale(12), color: '#000' }}>
+              CGST:{show_list.reduce((prev, next) =>
+                prev + parseInt(next.in_cgst), 0)} </Text>
+            <Text style={{ fontSize: scale(12), color: '#000' }}>
+              SGST:{show_list.reduce((prev, next) =>
+                prev + parseInt(next.in_sgst), 0)} </Text>
+            <Text style={{ fontSize: scale(12), color: '#000' }}>
+              Total Invoice Value (INR):{show_list.reduce((prev, next) =>
+                prev + parseInt(next.total_amount), 0)} </Text>
           </View>
 
 
 
 
 
+
         </View>
-
- {
-            this.state.show_list.length>0?
-            <View
-            style={{
-            flexDirection: "row",
-            justifyContent: 'space-between',
-            width: scale(250),
-            alignSelf: "center"
-
-          }}
-          >
-            <TouchableOpacity
-            onPress={() => {
-
-              if (this.state.show_list.length > 0) {
-                this.printHTML()
-              } else {
-                alert("No Record Found")
-              }
-            }}
-            style={{
-              width: scale(100),
-              height: scale(40),
-              borderRadius: scale(10),
-              backgroundColor: Color.headerTintColor,
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
-          >
-            <Text style={{
-              fontSize: scale(15),
-              color: 'white',
-              fontWeight: 'bold',
-              width: scale(100),
-              textAlign: 'center'
-            }}
-              numberOfLines={1}
-            >Print</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-
-              if (this.state.show_list.length > 0) {
-                this.requestRunTimePermission()
-              } else {
-                alert("No Record Found")
-              }
+      </View>
+    );
+    return footer_View;
+  }
 
 
-            }}
-            style={{
-              width: scale(100),
-              height: scale(40),
-              borderRadius: scale(10),
-              backgroundColor: Color.bgColor,
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
-          >
-            <Text style={{
-              fontSize: scale(15),
-              color: 'white',
-              fontWeight: 'bold',
-              width: scale(100),
-              textAlign: 'center'
-            }}
-              numberOfLines={1}
-            >Export</Text>
-          </TouchableOpacity>
+  render() {
+    const actions = [
+      {
+        text: 'Print pdf',
+        icon: Images.print,
+        name: 'print',
+        position: 1,
+        textStyle: { fontSize: scale(10) },
+        buttonSize: scale(30),
+        textContainerStyle: {
+          height: scale(30),
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+      },
+      {
+        text: 'Export Excel',
+        icon: Images.file,
+        name: 'export',
+
+        position: 2,
+        textStyle: { fontSize: scale(10) },
+        buttonSize: scale(30),
+        textContainerStyle: {
+          height: scale(30),
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+      },
+
+    ];
+
+    const { activeSections, show_list } = this.state;
+
+    return (
+      <View style={{
+        flex: 1,
+        backgroundColor: "#fff"
+      }}>
+        {this.renderHeader()}
+        <ScrollView
+          style={{ flex: 1 }}
+          contentInsetAdjustmentBehavior="automatic"
+          refreshControl={
+            <RefreshControl
+              onRefresh={() => this.onRefresh()}
+              refreshing={this.state.refresh}
+            />
+          }
+          onEndReachedThreshold={1}
+          onMomentumScrollBegin={() => this._onMomentumScrollBegin()}
+          onMomentumScrollEnd={this.handleLoadMore.bind(this)}
+        >
+
+          {
+            show_list.length > 0 ?
+              <Accordion
+                activeSections={activeSections}
+                sections={show_list}
+                touchableComponent={TouchableWithoutFeedback}
+                expandMultiple={false}
+                renderHeader={this.renderShow}
+                renderContent={this.renderContent}
+                duration={400}
+                onChange={this.setSections}
+              /> :
+              < View style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                {this.state.loading == false ? (
+                  <View style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <View style={{
+                      backgroundColor: "#ddd",
+                      width: scale(80), height: scale(80),
+                      alignItems: "center",
+                      justifyContent: 'center',
+                      borderRadius: scale(80) / 2,
+                      borderWidth: 2,
+                      borderColor: '#AED581'
+                    }}>
+
+                      <Image source={Images.logo} style={{
+                        resizeMode: 'contain',
+                        width: scale(50),
+                        height: scale(50),
+                      }} />
+                    </View>
+
+                    <Text style={{
+                      fontSize: scale(15),
+                      width: scale(150),
+                      textAlign: 'center',
+                      marginTop: scale(5)
+                    }}>No Record Found</Text>
+                  </View>
+                ) : null}
+              </ View>
 
 
-        </View>:null
- }
+          }
 
-      
+          {this.renderFooter()}
+
+        </ScrollView>
 
 
 
 
-</ImageBackground>
+
+
+        <LogoSpinner loading={this.state.loading} />
+
+        {this._filterRender()}
+
+
+        {show_list.length > 0 ? this.renderFOB() : null}
+        {show_list.length > 0 ? this.renderNext() : null}
       </View>
     );
   }
 }
 
 
+
 const styles = StyleSheet.create({
-  containter: {
-    width: Dimensions.get("window").width, //for full screen
-    height: Dimensions.get("window").height //for full screen
-  },
-  fixed: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0
-  },
-  txt: { fontSize: scale(12), width: scale(300), },
+
+  txt: { fontSize: scale(12), width: '90%' },
 
 
   userInput: {
     height: scale(40),
     backgroundColor: 'white',
+    marginBottom: scale(15),
+    borderColor: 'grey',
     borderWidth: scale(1),
-    width: scale(100),
-    justifyContent: "center",
-    borderRadius: scale(5),
-    borderColor: "#ddd",
-    marginLeft: scale(5)
+    width: scale(180),
+    marginLeft: scale(30)
+  },
 
+  input: {
+    color: '#000',
+    marginLeft: scale(5),
+    width: '73%',
+    fontSize: scale(12)
   },
 
 
@@ -1618,16 +1385,60 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     marginBottom: 20,
   },
-  header: {
-    backgroundColor: '#F5FCFF',
-    padding: 10,
+
+
+
+
+  active: {
+    backgroundColor: 'rgba(245,252,255,1)',
+    padding: scale(10),
+
+    marginHorizontal: scale(20),
+    borderTopLeftRadius: scale(10),
+    borderTopRightRadius: scale(10),
+    borderBottomWidth: scale(1),
+    borderColor: '#ddd'
+  },
+  inactive: {
+    backgroundColor: '#fff',
+
+    padding: scale(10),
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 9,
+    },
+    shadowOpacity: 0.48,
+    shadowRadius: 11.95,
+    elevation: 10,
+    marginHorizontal: scale(20),
+    marginVertical: scale(10),
+    borderRadius: scale(10)
+
+  },
+  activeContent: {
+    backgroundColor: 'rgba(245,252,255,1)',
+    padding: scale(10),
+
+    marginHorizontal: scale(20),
+    borderBottomLeftRadius: scale(10),
+    borderBottomRightRadius: scale(10),
+
+  },
+  inactiveContent: {
+    backgroundColor: '#fff',
+    height: scale(0),
+    padding: scale(10),
+    marginHorizontal: scale(20),
+
+
+
   },
 
 
 
 
 });
-
 
 
 
