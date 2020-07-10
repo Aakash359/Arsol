@@ -54,6 +54,7 @@
     "react-native-snackbar": "^2.2.0",
     "react-native-snap-carousel": "^3.9.0",
     "react-native-svg": "^12.1.0",
+    "react-native-tab-view": "^2.14.4",
     "react-native-table-component": "^1.2.1",
     "react-native-timezone": "^1.0.3",
     "react-redux": "^7.2.0",

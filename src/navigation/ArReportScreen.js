@@ -11,8 +11,7 @@ export default class ArReportScreen extends React.Component {
   render() {
     return(
       <>
-     
-        <ArReport navigation={this.props.navigation} />
+      <ArReport navigation={this.props.navigation} />
         </>
     )
 
