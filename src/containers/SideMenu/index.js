@@ -69,7 +69,7 @@ class SideMenuScreen extends PureComponent {
     return (
       <Modal
       transparent={true}
-      animationType='slide'
+      animationType={'slide'}
       visible={this.state.option_status}
       onRequestClose={() => {
         this.setState({option_status: false});
@@ -77,15 +77,15 @@ class SideMenuScreen extends PureComponent {
         <View style={{ flex: 1, 
                        backgroundColor: 'rgba(0,0,0,0.5)',
                       alignItems:'center',
-
-                 
+                      justifyContent:'center'
                        }}>
 
         <View style={{
-       marginTop:scale(100),
-        width: '50%',
+       
+        width: '80%',
         height:'34%',
-        borderRadius:scale(5),
+        borderTopEndRadius:scale(90),
+        borderBottomStartRadius:scale(90),
         borderWidth:scale(1),
         borderColor:'#ddd',
      
@@ -105,7 +105,7 @@ class SideMenuScreen extends PureComponent {
        <View style={{flexDirection:'row',
        justifyContent:"space-between",
        
-       width:'100%'}}>
+       width:'90%'}}>
               <Text style={{
                 fontSize: scale(18),
                 fontWeight: "bold",
@@ -151,14 +151,15 @@ class SideMenuScreen extends PureComponent {
                 shadowRadius: 11.95,
 
                 elevation: 20,
-              
+                borderTopEndRadius: scale(15),
+                borderBottomStartRadius: scale(15),
             
                 backgroundColor: "#fff",
                 width:scale(150),
                 alignItems:"center",
                 justifyContent:"center",
                 marginTop:scale(10),
-              
+                marginLeft:scale(5)
                 }}
               onPress={() => {
                 this.setState({ option_status: false }, () => {
@@ -181,14 +182,15 @@ class SideMenuScreen extends PureComponent {
                 shadowRadius: 11.95,
 
                 elevation: 20,
-            
+                borderTopEndRadius: scale(15),
+                borderBottomStartRadius: scale(15),
              //   borderRadius: scale(15),
                 backgroundColor: "#fff",
                 width: scale(150),
                 alignItems: "center",
                 justifyContent: "center",
                 marginTop:scale(10),
-         
+                marginLeft:scale(30)
               }}
               onPress={() => {
                 this.setState({ option_status: false }, () => {
@@ -211,14 +213,15 @@ class SideMenuScreen extends PureComponent {
                 shadowRadius: 11.95,
 
                 elevation: 20,
-           
+                borderTopEndRadius: scale(15),
+                borderBottomStartRadius: scale(15),
                // borderRadius: scale(15),
                 backgroundColor: "#fff",
                 width: scale(150),
                 alignItems: "center",
                 justifyContent: "center",
                 marginTop: scale(10),
-               
+                marginLeft: scale(60)
               }}
               onPress={() => {
                 this.setState({ option_status: false }, () => {
@@ -241,13 +244,14 @@ class SideMenuScreen extends PureComponent {
                 shadowRadius: 11.95,
 
                 elevation: 20,
-              
+                borderTopEndRadius: scale(15),
+                borderBottomStartRadius: scale(15),
                 backgroundColor: "#fff",
                 width: scale(150),
                 alignItems: "center",
                 justifyContent: "center",
                 marginTop: scale(10),
-
+                marginLeft: scale(100)
               }}
               onPress={() => {
                 this.setState({ option_status: false }, () => {

@@ -35,7 +35,6 @@ import RNFetchBlob from 'rn-fetch-blob';
 import RNPrint from 'react-native-print';
 import { FloatingAction } from 'react-native-floating-action';
 
-
 class ArReportScreen extends PureComponent {
 
 

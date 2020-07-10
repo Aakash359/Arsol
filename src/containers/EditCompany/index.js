@@ -1874,9 +1874,7 @@ class EditCompanyScreen extends PureComponent {
 
         return (
             <View style={{
-                justifyContent: "center",
-                 flex: 1,
-                 backgroundColor: "white",
+                justifyContent: "center", flex: 1,backgroundColor: "white",
            }}>
              
 
