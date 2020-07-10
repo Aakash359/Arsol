@@ -1,6 +1,7 @@
 import React, { PureComponent ,Fragment} from "react";
 import {
   View, TouchableHighlight, TouchableWithoutFeedback,
+  ImageBackground,Dimensions,
 
   Text,Modal,ScrollView,TextInput,PermissionsAndroid,
   StyleSheet,FlatList,TouchableOpacity,Alert,RefreshControl,Image,ActivityIndicator
@@ -46,10 +47,10 @@ class GstReportScreen extends PureComponent {
       onEndReachedCalledDuringMomentum: true,
       page:0,
       show_list:[],
-      filter:false,
+      
 
-      ch_all:true,
-      ch_invoice:false,
+      ch_all:false,
+      ch_invoice:true,
     
       start_date:moment(new Date()).format('DD/MM/YYYY'),
       end_date:moment(new Date()).format('DD/MM/YYYY'),
@@ -80,10 +81,11 @@ class GstReportScreen extends PureComponent {
         total_sgst9:0,
         total_sgst14:0,
         total_val:0,
+
+        filter_type:1
   
 
-     pdf_data:[],
-      activeSections: [],
+
      }
 
  }
@@ -91,21 +93,67 @@ class GstReportScreen extends PureComponent {
  componentDidMount() {
   const { network} = this.props;
 
-
-  if(!network.isConnected){
+this._subscribe = this.props.navigation.addListener('focus', () => {
+  if (!network.isConnected) {
     Snackbar.show({
       text: msg.noInternet,
       duration: Snackbar.LENGTH_SHORT,
       backgroundColor: "red"
     });
-  }else{
-    this.setState({loading:true},()=>{
-   
-      
+  } else {
+    this.setState({ loading: true,
+      refresh: false,
+      load_more: false,
+      onEndReachedCalledDuringMomentum: true,
+      page: 0,
+      show_list: [],
+
+
+      ch_all: false,
+      ch_invoice: true,
+
+      start_date: moment(new Date()).format('DD/MM/YYYY'),
+      end_date: moment(new Date()).format('DD/MM/YYYY'),
+
+      totaltax_val: 0,
+      totaltax0: 0,
+      totaltax2: 0,
+      totaltax5: 0,
+      totaltax12: 0,
+      totaltax18: 0,
+      totaltax28: 0,
+      total_igst0: 0,
+      total_igst2: 0,
+      total_igst5: 0,
+      total_igst12: 0,
+      total_igst18: 0,
+      total_igst28: 0,
+      total_cgst0: 0,
+      total_cgst1: 0,
+      total_cgst2_5: 0,
+      total_cgst6: 0,
+      total_cgst9: 0,
+      total_cgst14: 0,
+      total_sgst0: 0,
+      total_sgst1: 0,
+      total_sgst2_5: 0,
+      total_sgst6: 0,
+      total_sgst9: 0,
+      total_sgst14: 0,
+      total_val: 0,
+
+      filter_type: 1
+    
+    }, () => {
+
+
 
       this.hit_gst_reportsApi()
-   
-    })}
+
+    })
+  }
+})
+
   }
 
   
@@ -260,17 +308,19 @@ class GstReportScreen extends PureComponent {
 }
 
  _checkbox_fun(val){
-   if(val.label=="All"){
+   if(val == "0"){
      this.setState({
       ch_all:true,
       ch_invoice:false,
       start_date:moment(new Date()).format('DD/MM/YYYY'),
       end_date:moment(new Date()).format('DD/MM/YYYY'),
      })
-   }else if(val.label=="Invoice Period"){
+   }else if(val == "1"){
     this.setState({
       ch_all:false,
       ch_invoice:true,
+      start_date:moment(new Date()).format('DD/MM/YYYY'),
+      end_date:moment(new Date()).format('DD/MM/YYYY'),
      })}
    
  }
@@ -458,6 +508,35 @@ borderRadius: scale(4),
           load_more:false,
           page: 0,
           show_list: [],
+          totaltax_val: 0,
+          totaltax0: 0,
+          totaltax2: 0,
+          totaltax5: 0,
+          totaltax12: 0,
+          totaltax18: 0,
+          totaltax28: 0,
+          total_igst0: 0,
+          total_igst2: 0,
+          total_igst5: 0,
+          total_igst12: 0,
+          total_igst18: 0,
+          total_igst28: 0,
+          total_cgst0: 0,
+          total_cgst1: 0,
+          total_cgst2_5: 0,
+          total_cgst6: 0,
+          total_cgst9: 0,
+          total_cgst14: 0,
+          total_sgst0: 0,
+          total_sgst1: 0,
+          total_sgst2_5: 0,
+          total_sgst6: 0,
+          total_sgst9: 0,
+          total_sgst14: 0,
+          total_val: 0,
+
+
+
         },
         () => {
           this.hit_gst_reportsApi();
@@ -471,6 +550,7 @@ borderRadius: scale(4),
     const {user_id,user_type} = this.props
     const {page,start_date,end_date,} = this.state
     var filter_type = this.filter_fun()
+    this.setState({ filter_type: filter_type })
     ArsolApi.GstReports_api(user_id,user_type,
       filter_type,
       start_date,
@@ -648,355 +728,594 @@ borderRadius: scale(4),
 
 
 
+
+
+
+
+
+
   //footer
   renderFooter = () => {
-    if (!this.state.load_more) return <View style={{ marginBottom: scale(100),}}></View>;
+    const { totaltax_val,
+      totaltax0,
+      totaltax2,
+      totaltax5,
+      totaltax12,
+      totaltax18,
+      totaltax28,
+      total_igst0,
+      total_igst2,
+      total_igst5,
+      total_igst12,
+      total_igst18,
+      total_igst28,
+      total_cgst0,
+      total_cgst1,
+      total_cgst2_5,
+      total_cgst6,
+      total_cgst9,
+      total_cgst14,
+      total_sgst0,
+      total_sgst1,
+      total_sgst2_5,
+      total_sgst6,
+      total_sgst9,
+      total_sgst14,
+      total_val
+    } = this.state
+
+    if (!this.state.load_more) return (
+
+      <View>
+        {
+          this.state.show_list.length > 0 ?
+
+            <View style={{
+              flexDirection: 'row',
+
+              borderWidth: scale(0.5),
+              borderColor: '#ccc',
+              backgroundColor: '#fff'
+            }}>
+              <Text style={{
+                padding: scale(10),
+                width: scale(100),
+                fontWeight: 'bold',
+                fontSize: scale(12),
+                textAlign: 'center',
+                textAlignVertical: 'center',
+                borderColor: '#ddd',
+                borderRightWidth: scale(1)
+              }}
+                numberOfLines={2}
+              ></Text>
+
+              <Text style={{
+
+                padding: scale(10),
+                width: scale(100),
+                fontWeight: 'bold',
+                fontSize: scale(12),
+                textAlign: 'center',
+                textAlignVertical: 'center',
+                borderColor: '#ddd',
+                borderRightWidth: scale(1)
+              }}
+                numberOfLines={2}
+              >Total:</Text>
+              <Text style={{
+
+                padding: scale(10),
+                width: scale(100),
+                fontWeight: 'bold',
+                fontSize: scale(12),
+                textAlign: 'center',
+                textAlignVertical: 'center',
+                borderColor: '#ddd',
+                borderRightWidth: scale(1)
+              }}
+                numberOfLines={2}
+              ></Text>
+              <Text style={{
+
+                padding: scale(10),
+                width: scale(100),
+                fontWeight: 'bold',
+                fontSize: scale(12),
+                textAlign: 'center',
+                textAlignVertical: 'center',
+                borderColor: '#ddd',
+                borderRightWidth: scale(1)
+              }}
+                numberOfLines={2}
+              ></Text>
+
+              {
+                totaltax_val > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax_val}</Text> : null}
+              {
+                totaltax0 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax0}</Text>
+                  : null}
+              {
+                totaltax2 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax2}</Text>
+                  : null}
+
+              {
+                totaltax5 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax5}</Text>
+                  : null}
+
+              {
+                totaltax12 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax12}</Text>
+                  : null}
+
+              {
+                totaltax18 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax18}</Text>
+                  : null}
+
+              {
+                totaltax28 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax28}</Text>
+                  : null}
+
+              {/* 0 % */}
+              {
+                total_igst0 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst0}</Text>
+                  : null}
+
+              {
+                total_cgst0 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst0}</Text>
+                  : null}
+
+              {
+                total_sgst0 > 0 ?
+
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst0}</Text>
+                  : null}
+
+              {/* 2 % */}
+
+              {
+                total_igst2 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst2}</Text>
+                  : null}
+              {
+                total_cgst1 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst1}</Text>
+                  : null}
+
+              {
+                total_sgst1 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst1}</Text>
+                  : null}
+
+              {/* 5% */}
+
+              {
+                total_igst5 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst5}</Text> : null}
+              {
+                total_cgst2_5 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst2_5}</Text> : null}
+              {
+                total_sgst2_5 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst2_5}</Text> : null}
+
+
+
+
+              {/* 12 % */}
+
+
+              {
+                total_igst12 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst12}</Text> : null}
+              {
+                total_cgst6 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst6}</Text> : null}
+              {
+                total_sgst6 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst6}</Text> : null}
+
+
+              {/* 18 % */}
+
+
+              {
+                total_igst18 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst18}</Text> : null}
+              {
+                total_cgst9 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst9}</Text> : null}
+              {
+                total_sgst9 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst9}</Text> : null}
+
+
+              {/* 28 % */}
+
+              {
+                total_igst28 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst28}</Text> : null}
+              {
+                total_cgst14 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst14}</Text> : null}
+              {
+                total_sgst14 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst14}</Text> : null}
+
+              {
+                total_val > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+
+                  }}
+                    numberOfLines={2}
+                  >{total_val}</Text> : null}
+
+
+            </View>
+
+
+
+            : <View style={{ marginBottom: scale(100), }} />
+        }
+
+      </View>
+
+
+    )
+
     return (
-      <View style={{marginBottom: scale(100),}}>
-        <ActivityIndicator size="large" color="#ddd" />
+      <View style={{
+        marginBottom: scale(100),
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+      }}>
+        <ActivityIndicator size="small" color="#ddd" />
       </View>
     );
   };
-
-
-    // 
-    renderNext(){
-      const {
-        totaltax_val,
-        totaltax0,
-        totaltax2,
-        totaltax5,
-        totaltax12,
-        totaltax18,
-        totaltax28,
-        total_igst0,
-        total_igst2,
-        total_igst5,
-        total_igst12,
-        total_igst18,
-        total_igst28,
-        total_cgst0,
-        total_cgst1,
-        total_cgst2_5,
-        total_cgst6,
-        total_cgst9,
-        total_cgst14,
-        total_sgst0,
-        total_sgst1,
-        total_sgst2_5,
-        total_sgst6,
-        total_sgst9,
-        total_sgst14,
-        total_val
-      }=this.state
-  
-  
-      var footer_View = (
-        <View style={{backgroundColor: 'transparent'}}>
-          <View
-            style={{
-              width: '94%',
-              alignSelf: 'center',
-  
-              borderTopWidth: 0.8,
-              borderLeftWidth: 0.8,
-              borderRightWidth: 0.8,
-              borderTopLeftRadius: scale(7),
-              borderTopRightRadius: scale(7),
-              borderColor: 'grey',
-              padding: scale(3),
-      
-            
-            }}>
-              <Text style={{fontSize:scale(12),color:'#000',fontWeight:'700'}}>  Total</Text>
-            
-              <View style={{marginLeft:scale(20)}}>
-
-              {
-                totaltax_val>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>Taxable Value {totaltax_val} </Text>:null
-                }
-                {
-                  totaltax0>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>Taxable Value (0%) {totaltax0} </Text>:null
-                }
-                {
-                  totaltax2>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>Taxable Value (2%) {totaltax2} </Text>:null
-                }
-                 {
-                  totaltax5>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>Taxable Value (5%) {totaltax5} </Text>:null
-                }
-
-                    {
-                  totaltax12>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>Taxable Value (12%) {totaltax12} </Text>:null
-                }
-                  {
-                  totaltax18>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>Taxable Value (12%) {totaltax18} </Text>:null
-                }
-                {
-                  totaltax28>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>Taxable Value (28%) {totaltax28} </Text>:null
-                }
-
-
-
-                {
-                  total_igst0>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>IGST (0%) {total_igst0} </Text>:null
-                }
-
-
-{
-  total_igst2>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>IGST (2%) {total_igst2} </Text>:null
-                }
-                  {
-                  total_igst5>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>IGST (5%) {total_igst5} </Text>:null
-                }
-                  {
-                  total_igst12>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>IGST (12%) {total_igst12} </Text>:null
-                }
-                {
-                  total_igst18>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>IGST (18%) {total_igst18} </Text>:null
-                }
-
-                {
-                  total_igst28>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>IGST (28%) {total_igst28} </Text>:null
-                }
-
-
-                {
-                  total_cgst0>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>CGST (0%) {total_cgst0} </Text>:null
-                }
-
-
-                  {
-                  total_cgst1>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>CGST (1%) {total_cgst1} </Text>:null
-                }
-                  {
-                  total_cgst2_5>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>CGST (2.5%) {total_cgst2_5} </Text>:null
-                }
-                {
-                  total_cgst6>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>CGST (6%) {total_cgst6} </Text>:null
-                }
-
-                {
-                  total_cgst9>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>CGST (9%) {total_cgst9} </Text>:null
-                }
-
-                 {
-                  total_cgst14>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>CGST (14%) {total_cgst14} </Text>:null
-                }
-                
-
-                {
-                  total_sgst0>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>SGST (0%) {total_sgst0} </Text>:null
-                }
-                  {
-                  total_sgst1>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>SGST (1%) {total_sgst1} </Text>:null
-                }
-                {
-                  total_sgst2_5>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>SGST (2.5%) {total_sgst2_5} </Text>:null
-                }
-
-                {
-                  total_sgst6>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>SGST (6%) {total_sgst6} </Text>:null
-                }
-
-                 {
-                  total_sgst9>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>SGST (9%) {total_sgst9} </Text>:null
-                }
-
-                {
-                  total_sgst14>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>SGST (14%) {total_sgst14} </Text>:null
-                }
-
-                {
-                  total_val>0?
-                  <Text style={{fontSize:scale(12),color:'#000'}}>Amount {total_val} </Text>:null
-                }
-            
-  
-              </View>
-            
-  
-            
-            
-  
-          
-          </View>
-        </View>
-      );
-      return footer_View;
-    }
 
 
   renderHeader() {
     return (
       <View
         style={{
-          height: scale(50), backgroundColor: "#80d4ff",
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 9,
-          },
-          shadowOpacity: 0.48,
-          shadowRadius: 11.95,
-
-          elevation: 20,
-          borderRadius: scale(15),
-          margin: scale(7),
+          backgroundColor: Color.bgColor,
+          borderRadius: scale(5),
           justifyContent: "center",
-          padding: scale(10)
-
+          alignItems: "center",
+          padding: scale(10),
+          width: scale(150),
+          alignSelf: 'center'
         }}
       >
+        <Text style={{
+          fontSize: scale(18),
+          color: '#000',
 
-        <View style={{ justifyContent: 'center', alignContent: 'center' }}>
-          <TouchableHighlight
-            activeOpacity={1}
-            underlayColor={'#ddd'}
-            onPress={() => this.props.navigation.toggleDrawer()}
-            style={{
-              width: scale(40), height: scale(40),
-              alignItems: "center",
-              justifyContent: 'center',
-              borderRadius: scale(20)
-            }}
-          >
-
-            <Image source={Images.menu} style={{
-              width: scale(20), height: scale(20),
-
-
-            }} />
-
-          </TouchableHighlight>
-
-          <Text style={{
-            position: "absolute",
-            alignSelf: "center",
-            fontSize: scale(18),
-            color: "#fff",
-            fontWeight: 'bold'
-          }}>Gst Report</Text>
-
-          <TouchableHighlight
-            activeOpacity={1}
-            underlayColor={'#ddd'}
-            onPress={() => { this.setState({ filter: true }) }}
-            style={{
-              position: "absolute", marginLeft: scale(280), width: scale(40), height: scale(40),
-              alignItems: "center",
-              justifyContent: 'center',
-              borderRadius: scale(20)
-            }}
-          >
-
-            <Image source={Images.filterw} style={{
-              width: scale(30), height: scale(30),
-
-
-            }} />
-
-          </TouchableHighlight>
-        </View>
+        }}
+          numberOfLines={1}
+        >GST Report</Text>
 
       </View>
-
     )
   }
 
-  _handleAdd(item) {
-    const { navigation, network } = this.props;
-
-
- if (item == 'export') {
-      if (this.state.show_list.length > 0) {
-        this.requestRunTimePermission()
-      } else {
-        alert("No Record Found")
-      }
-    }
-
-    if (network.isConnected) {
-
-    } else {
-      Snackbar.show({
-        text: msg.noInternet,
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: "red"
-      });
-    }
-  }
-
-  //=================================================
-
-
-  setSections = sections => {
-    this.setState({
-      activeSections: sections.includes(undefined) ? [] : sections,
-    });
-  };
-
-
-
-
-  renderShow = (section, _, isActive) => {
-    
-
-    return (
-      <Animatable.View
-        duration={400}
-        style={
-          isActive ? styles.active : styles.inactive}
-
-      >
-   
-      
-              <Text style={{
-                fontSize: scale(14), fontWeight: 'bold', fontStyle: 'italic',
-                textTransform: 'capitalize'
-              }}
-                numberOfLines={1}
-           >{section.cust_name}</Text>
-              <Text style={styles.txt}
-                numberOfLines={1}
-                >Invoice Number:{section.inv_no}</Text>
-
-
-
-
-
-
-
-
-      </Animatable.View>
-    );
-  };
-
-  renderContent = (section, _, isActive) => {
+  renderTitle() {
     const { totaltax_val,
       totaltax0,
       totaltax2,
@@ -1025,480 +1344,1396 @@ borderRadius: scale(4),
       total_val
     } = this.state
     return (
-      <View>
+      <View style={{
+        flexDirection: 'row',
+
+        borderWidth: scale(0.5),
+        borderColor: '#ccc',
+        backgroundColor: '#fff'
+      }}>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >Invoice Date</Text>
+
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >Invoice Number</Text>
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >Customer Name</Text>
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >GST Number</Text>
+
         {
-          isActive ? <Animatable.View
-            duration={400}
-            style={
-              isActive ? styles.activeContent : styles.inactiveContent}>
+          totaltax_val > 0 ?
+            <Text style={{
 
-            
-                  <Animatable.Text style={styles.txt}
-                    numberOfLines={1}
-                    animation={isActive ? 'bounceIn' : undefined}
-            >GST Number::{section.Gst_number}</Animatable.Text>
-                  <Animatable.Text style={styles.txt}
-                    numberOfLines={1}
-                    animation={isActive ? 'bounceIn' : undefined}
-            >Invoice Date:{section.inv_date}</Animatable.Text>
-              
-                  <Animatable.Text style={styles.txt}
-                    numberOfLines={1}
-                    animation={isActive ? 'bounceIn' : undefined}
-                  >Total Amount:{section.total_amt}</Animatable.Text>
-                  
-            {
-              totaltax_val > 0 ?
-                
-                  <Animatable.Text style={styles.txt}
-                    numberOfLines={1}
-                  >Taxable Value:{section.totaltax_val}</Animatable.Text>
-                : null}
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >Taxable Value</Text>:null}
+        {
+          totaltax0 > 0 ?
+        <Text style={{
 
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >Taxable Value (0%)</Text>
+         :null} 
+        {
+          totaltax2 > 0 ?
+        <Text style={{
 
-            {
-              totaltax0 > 0 ?
-                
-                  <Animatable.Text style={styles.txt}
-                    numberOfLines={1}
-                  >Taxable Value(0%):{section.taxable_val0}</Animatable.Text>
-                
-                : null
-            }
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >Taxable Value (2%)</Text>
+       :null}
+       
+        {
+          totaltax5 > 0 ?
+        <Text style={{
 
-            {
-              totaltax2 > 0 ?
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >Taxable Value (5%)</Text>
+       :null}
 
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >Taxable Value(2%):{section.taxable_val2}</Text>
-                 : null}
+       {
+          totaltax12 > 0 ?
+   <Text style={{
 
-            {
-              totaltax5 > 0 ?
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >Taxable Value(5%):{section.taxable_val5}</Text>
-                 : null}
-
-
-            {
-              totaltax12 > 0 ?
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >Taxable Value(12%):{section.taxable_val12}</Text>
-             : null}
-
-            {
-              totaltax18 > 0 ?
-
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >Taxable Value(18%):{section.taxable_val18}</Text>
-                 : null}
-
-            {
-              totaltax28 > 0 ?
-               
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >Taxable Value(28%):{section.taxable_val28}</Text>
-                 : null}
-
-            {
-              total_igst0 > 0 ?
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >IGST (0%):{section.igst0}</Text>
-                 : null}
-
-
-            {
-              total_cgst0 > 0 ?
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >CGST (0%):{section.cgst0}</Text>
-                 : null}
-
-            {
-              total_sgst0 > 0 ?
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >SGST (0%):{section.sgst0}</Text>
-                 : null}
-
-
-            {
-              total_igst2 > 0 ?
-             
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >IGST (2%):{section.igst2}</Text>
-                 : null}
-
-
-            {
-              total_cgst1 > 0 ?
-             
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >CGST (1%):{section.cgst1}</Text>
-                : null}
-
-
-            {
-              total_sgst1 > 0 ?
-               
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >SGST (1%):{section.sgst1}</Text>
-             : null}
-
-            {
-              total_igst5 > 0 ?
-
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >IGST (5%):{section.igst5}</Text>
-                 : null}
-            {
-              total_cgst2_5 > 0 ?
-                <View style={{ flexDirection: 'row' }}>
-                  <Text style={styles.txth}
-                    numberOfLines={1}
-                  >CGST (2.5%):</Text>
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >{section.cgst2_5}</Text>
-                </View> : null}
-
-            {
-              total_sgst2_5 > 0 ?
-               
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >SGST (2.5%):{section.sgst2_5}</Text>
-                : null}
-
-            {
-              total_igst12 > 0 ?
-               
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >IGST (12%):{section.igst12}</Text>
-                : null}
-
-            {
-              total_cgst6 > 0 ?
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >CGST (6%):{section.cgst6}</Text>
-                 : null}
-
-            {
-              total_sgst6 > 0 ?
-               
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >SGST (6%):{section.sgst6}</Text>
-              : null}
-
-            {
-              total_igst18 > 0 ?
-               
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >IGST (18%):{section.igst18}</Text>
-                : null}
-
-            {
-              total_cgst9 > 0 ?
-              
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >CGST (9%):{section.cgst9}</Text>
-                : null}
-
-            {
-              total_sgst9 > 0 ?
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >SGST (9%):{section.sgst9}</Text>
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >Taxable Value (12%)</Text>
             : null}
 
-            {
-              total_igst28 > 0 ?
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >IGST (28%):{section.igst28}</Text>
-                : null}
+        {
+          totaltax18 > 0 ?
+        <Text style={{
 
-            {
-              total_cgst14 > 0 ?
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >CGST (14%):{section.cgst14}</Text>
-                 : null}
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >Taxable Value (18%)</Text>
+      :null}
+      
+        {
+          totaltax28 > 0 ?
+        <Text style={{
 
-            {
-              total_sgst14 > 0 ?
-                
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >SGST (14%):{section.sgst14}</Text>
-                 : null}
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >Taxable Value (28%)</Text>
+        :null}
 
-            {
+{/* 0 % */}
+        {
+          total_igst0 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >IGST (0%)</Text>
+          :null}
+      
+        {
+          total_cgst0 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >CGST (0%)</Text>
+        :null}
+
+        {
+              total_sgst0 > 0 ?
+        
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >SGST (0%)</Text>
+        :null}
+
+        {/* 2 % */}
+
+         {
+          total_igst2 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >IGST (2%)</Text>
+        :null}
+        {
+              total_cgst1 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >CGST (1%)</Text>
+      :null}
+      
+        {
+          total_sgst1 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >SGST (1%)</Text>
+          :null}
+
+        {/* 5% */}
+
+             {
+              total_igst5 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >IGST (5%)</Text>:null}
+        {
+          total_cgst2_5 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >CGST (2.5%)</Text>:null}
+             {
+          total_sgst2_5 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >SGST (2.5%)</Text>:null}
+
+
+       
+
+        {/* 12 % */}
+
+
+        {
+          total_igst12 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >IGST (12%)</Text>:null}
+        {
+          total_cgst6 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >CGST (6%)</Text>:null}
+        {
+              total_sgst6 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >SGST (6%)</Text>:null}
+
+
+        {/* 18 % */}
+
+
+        {
+          total_igst18 > 0 ?
+            <Text style={{
+
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >IGST (18%)</Text> : null}
+        {
+          total_cgst9 > 0 ?
+            <Text style={{
+
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >CGST (9%)</Text> : null}
+        {
+          total_sgst9 > 0 ?
+            <Text style={{
+
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >SGST (9%)</Text> : null}
+
+
+        {/* 28 % */}
+
+        {
+          total_igst28 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >IGST (28%)</Text>:null}
+        {
+          total_cgst14 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >CGST (14%)</Text>:null}
+        {
+          total_sgst14 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >SGST (14%)</Text>:null}
+        
+{
               total_val > 0 ?
-               
-                  <Text style={styles.txt}
-                    numberOfLines={1}
-                  >Total Amount:{section.total_val}</Text>
-                : null}
-            
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+
+        }}
+          numberOfLines={2}
+        >Total Invoice Amount</Text>:null}
+
+       
 
 
+      </View>
+    )
+  }
+  _renderListItem(rowData, index) {
+    const { totaltax_val,
+      totaltax0,
+      totaltax2,
+      totaltax5,
+      totaltax12,
+      totaltax18,
+      totaltax28,
+      total_igst0,
+      total_igst2,
+      total_igst5,
+      total_igst12,
+      total_igst18,
+      total_igst28,
+      total_cgst0,
+      total_cgst1,
+      total_cgst2_5,
+      total_cgst6,
+      total_cgst9,
+      total_cgst14,
+      total_sgst0,
+      total_sgst1,
+      total_sgst2_5,
+      total_sgst6,
+      total_sgst9,
+      total_sgst14,
+      total_val
+    } = this.state
+    return (
 
+      <View style={{
+        flexDirection: 'row',
+        borderWidth: scale(0.5),
+        borderColor: '#ccc'
 
+      }}
+        key={rowData.index}
+      >
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.inv_date}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.inv_no}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.cust_name}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.Gst_number}</Text>
+      
+      {totaltax_val>0?
+          <Text style={{
+            padding: scale(10),
+            width: scale(100),
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+            borderColor: '#ddd',
+            borderRightWidth: scale(1)
+          }}
+            numberOfLines={2}
+          >{rowData.item.taxable_val}</Text>
+      :null}
+      
 
+        {totaltax0>0?
+          <Text style={{
+            padding: scale(10),
+            width: scale(100),
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+            borderColor: '#ddd',
+            borderRightWidth: scale(1)
+          }}
+            numberOfLines={2}
+          >{rowData.item.taxable_val0}</Text>
+        :null
+      }
 
-
-
-          </Animatable.View> : null
+        {
+          totaltax2>0?
+            <Text style={{
+              padding: scale(10),
+              width: scale(100),
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >{rowData.item.taxable_val2}</Text>
+          
+          :null
         }
+        {
+          totaltax5 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.taxable_val5}</Text>:null}
+
+        {
+          totaltax12 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+            >{rowData.item.taxable_val12}</Text>:null}
+
+        {
+          totaltax18 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+            >{rowData.item.taxable_val18}</Text>:null}
+
+        {
+          totaltax28 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+            >{rowData.item.taxable_val28}</Text>:null}
+
+        {/* 0% */}
+        
+        {total_igst0>0?
+          <Text style={{
+            padding: scale(10),
+            width: scale(100),
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+            borderColor: '#ddd',
+            borderRightWidth: scale(1)
+          }}
+            numberOfLines={2}
+          >{rowData.item.igst0}</Text>
+        :null}
+
+        {
+          total_cgst0 > 0 ?
+        
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.cgst0}</Text>:null}
+
+        {
+          total_sgst0 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.sgst0}</Text>:null}
+
+        {/* 2% */}
+        {
+          total_igst2 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.igst2}</Text>:null}
+        {
+          total_cgst1 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.cgst1}</Text>:null}
+
+        {
+          total_sgst1 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.sgst1}</Text>:null}
+
+        {/* 5% */}
+     {
+              total_igst5 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.igst5}</Text>:null}
+        {
+          total_cgst2_5 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.cgst2_5}</Text>:null}
+        {
+          total_sgst2_5 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.sgst2_5}</Text>:null}
+
+        {/* 12% */}
+        {
+          total_igst12 > 0 ?
+            <Text style={{
+              padding: scale(10),
+              width: scale(100),
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >{rowData.item.igst12}</Text> : null}
+        {
+          total_cgst6 > 0 ?
+            <Text style={{
+              padding: scale(10),
+              width: scale(100),
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >{rowData.item.cgst6}</Text> : null}
+
+        {
+          total_sgst6 > 0 ?
+            <Text style={{
+              padding: scale(10),
+              width: scale(100),
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >{rowData.item.sgst6}</Text> : null}
+
+        {/* 18% */}
+   {
+          total_igst18 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.igst18}</Text>:null}
+
+        {
+          total_cgst9 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.cgst9}</Text>:null}
+        {
+          total_sgst9 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.sgst9}</Text>:null}
+
+        {/* 28% */}
+        {
+          total_igst28 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.igst28}</Text>
+      :null}
+      {
+          total_cgst14 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.cgst14}</Text>
+       :null}
+       {
+          total_sgst14 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.sgst14}</Text>
+      :null}
+        {
+          total_val > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.total_amt}</Text>:null}
+
+      
       </View>
 
 
 
-    );
+
+
+
+    )
   }
 
-  renderFOB() {
 
-    return (
-      <TouchableOpacity activeOpacity={0.5}
-        style={{
-          position: 'absolute',
-          width: scale(50),
-          height: scale(50),
-          alignItems: 'center',
-          justifyContent: 'center',
-          right: 50,
-          bottom: 160,
-          backgroundColor: "#fff",
-          borderRadius: scale(25),
-          elevation: 20,
-          shadowColor: "#000000",
-          shadowOpacity: 0.8,
-          shadowRadius: 2,
-          shadowOffset: {
-            height: 1,
-            width: 0
-          }
-
-        }}
-        onPress={() => {
-          if (this.state.show_list.length > 0) {
-            this.requestRunTimePermission()
-          } else {
-            alert("No Record Found")
-          }
-
-        }}
-      >
-
-        <Image source={Images.excel}
-
-          style={{
-            resizeMode: 'contain',
-            width: 50,
-            height: 50,
-          }} />
-
-      </TouchableOpacity>
-    );
-  }
 
   render() {
-const {show_list,activeSections}=this.state
-    
- 
-return (
-  <View style={{
-     flex: 1,
-    backgroundColor: "#fff"
-     }}>
-    {this.renderHeader()}
- <LogoSpinner loading={this.state.loading} />
-    <ScrollView
-      style={{ flex: 1 }}
-      contentInsetAdjustmentBehavior="automatic"
-      refreshControl={
-        <RefreshControl
-          onRefresh={() => this.onRefresh()}
-          refreshing={this.state.refresh}
-        />
-      }
-      onEndReachedThreshold={1}
-      onMomentumScrollBegin={() => this._onMomentumScrollBegin()}
-      onMomentumScrollEnd={this.handleLoadMore.bind(this)}
-    >
+    const { ch_display_name, ch_invoice, ch_invoice_no, ch_all,
+      invoice_number, display_name, filter_type } = this.state;
 
-      {
-        show_list.length > 0 ?
-          <Accordion
-            activeSections={activeSections}
-            sections={show_list}
-            touchableComponent={TouchableWithoutFeedback}
-            expandMultiple={false}
-            renderHeader={this.renderShow}
-            renderContent={this.renderContent}
-            duration={400}
-            onChange={this.setSections}
-          /> :
-          <View View style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            {this.state.loading == false ? (
-              <View style={{
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
+
+
+    return (
+      <View>
+        <ImageBackground
+          style={[styles.fixed, styles.containter]}
+          source={Images.listbg}>
+          <TouchableHighlight
+            activeOpacity={1}
+            underlayColor={'#ddd'}
+            onPress={() =>
+              this.props.navigation.toggleDrawer()}
+            style={{
+              width: scale(35), height: scale(35),
+              alignItems: "center",
+              justifyContent: 'center',
+              backgroundColor: Color.headerTintColor
+            }}
+          >
+            <Image source={Images.menu}
+              style={{
+                width: scale(20),
+                height: scale(20),
+              }} />
+          </TouchableHighlight>
+
+          {this.renderHeader()}
+
+          <LogoSpinner loading={this.state.loading} />
+
+
+
+          <View
+            style={{
+              padding: scale(10),
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 9,
+              },
+              shadowOpacity: 0.48,
+              shadowRadius: 11.95,
+
+              elevation: 20,
+              borderRadius: scale(15),
+              backgroundColor: "#fff",
+              marginHorizontal: scale(10),
+              marginVertical: scale(20),
+              height: '70%'
+            }}
+
+          >
+            <View style={{
+              borderWidth: 1,
+              height: '100%',
+              borderColor: '#ccc',
+              borderRadius: scale(5),
+              paddingBottom: scale(5)
+
+            }}>
+              <View
+                style={{
+                  padding: scale(5),
+                  backgroundColor: '#f1f3f6'
+                }}
+              >
+
                 <View style={{
-                  backgroundColor: "#ddd",
-                  width: scale(80), height: scale(80),
-                  alignItems: "center",
-                  justifyContent: 'center',
-                  borderRadius: scale(80) / 2,
-                  borderWidth: 2,
-                  borderColor: '#AED581'
-                }}>
+                  flexDirection: 'row',
+                  marginVertical: scale(5),
+                  alignItems: "center"
 
-                  <Image source={Images.logo} style={{
-                    resizeMode: 'contain',
-                    width: scale(50),
-                    height: scale(50),
-                  }} />
+                }}>
+                  <Text style={{
+                    fontSize: scale(12),
+                    fontWeight: 'bold',
+                    width: scale(50)
+                  }}
+                    numberOfLines={2}
+                  >Search Option:</Text>
+
+                  <TouchableOpacity>
+                    <Text
+                      style={{
+                        padding: scale(5),
+                        borderColor: '#000',
+                        borderWidth: scale(1),
+
+                        textAlign: 'center',
+
+                        fontSize: scale(10),
+                        backgroundColor: ch_all ? Color.headerTintColor : '#ccc',
+
+                        borderRadius: scale(5),
+                        color: ch_all ? '#fff' : '#000',
+                        marginLeft: scale(5)
+                      }}
+                      numberOfLines={1}
+                      onPress={() => { this._checkbox_fun(0) }}
+                    >All</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity>
+                    <Text
+                      style={{
+                        padding: scale(5),
+                        borderColor: '#000',
+                        borderWidth: scale(1),
+
+                        textAlign: 'center',
+
+                        fontSize: scale(10),
+                        backgroundColor: ch_invoice ? Color.headerTintColor : '#ccc',
+                        color: ch_invoice ? '#fff' : '#000',
+                        maxWidth: scale(100),
+                        borderRadius: scale(5),
+                        marginLeft: scale(5)
+
+                      }}
+                      numberOfLines={1}
+                      onPress={() => { this._checkbox_fun(1) }}
+
+                    >Invoice Period</Text>
+                  </TouchableOpacity>
+
+                  
+
+
                 </View>
 
-                <Text style={{
-                  fontSize: scale(15),
-                  width: scale(150),
-                  textAlign: 'center',
-                  marginTop: scale(5)
-                }}>No Record Found</Text>
+                
+
+                <View style={{
+                  flexDirection: 'row',
+                  marginTop: scale(5),
+
+                  alignItems: "center"
+                }}>
+
+                  {
+                    ch_invoice ?
+                      <View style={{ flexDirection: "row", }}>
+                        <DatePicker
+                          style={{ width: scale(100), }}
+                          date={this.state.start_date}
+                          placeholder="Select Start Date"
+                          mode={'date'}
+                          format="DD/MM/YYYY"
+                          confirmBtnText="Confirm"
+                          cancelBtnText="Cancel"
+                          showIcon={false}
+                          minuteInterval={10}
+                          onDateChange={(date) => { this.setState({ start_date: date }) }}
+
+                        />
+                        <DatePicker
+                          style={{ width: scale(100), marginLeft: scale(5) }}
+                          date={this.state.end_date}
+                          placeholder="Select End Date"
+                          mode={'date'}
+                          format="DD/MM/YYYY"
+                          confirmBtnText="Confirm"
+                          cancelBtnText="Cancel"
+                          showIcon={false}
+                          minuteInterval={10}
+                          onDateChange={(date) => { this.setState({ end_date: date }) }}
+
+                        />
+                      </View>
+                      : null
+                  }
+
+                  {
+                    ch_invoice_no ?
+                      <View style={styles.userInput}>
+                        <TextInput
+                          placeholder='Number'
+                          style={styles.input}
+                          autoCorrect={false}
+                          autoCapitalize={'none'}
+                          underlineColorAndroid="transparent"
+                          onChangeText={invoice_number => this.setState({ invoice_number })}
+                          value={invoice_number}
+                        />
+                      </View> : null
+                  }
+
+                  {ch_display_name ?
+                    <View style={styles.userInput}>
+                      <TextInput
+                        placeholder='Name'
+                        style={styles.input}
+                        autoCorrect={false}
+                        autoCapitalize={'none'}
+                        underlineColorAndroid="transparent"
+                        onChangeText={display_name => this.setState({ display_name })}
+                        value={display_name}
+                      />
+                    </View> : null
+                  }
+
+
+
+
+
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      this.onRefresh()
+                    }}
+
+                  >
+                    <Text style={{
+                      textAlign: 'center',
+                      fontSize: scale(10),
+                      padding: scale(5),
+                      maxWidth: scale(100),
+                      backgroundColor: '#0095DF',
+                      borderRadius: scale(5),
+                      color: '#fff',
+                      marginLeft: scale(10),
+                      height: scale(40),
+                      textAlignVertical: "center",
+                      minWidth: scale(60)
+                    }}
+                      numberOfLines={1}
+                    >Search</Text>
+                  </TouchableOpacity>
+                </View>
+
+
+                <Text
+                  style={{
+                    fontSize: scale(12),
+                    width: scale(300),
+                    marginVertical: scale(5)
+                  }}
+                  numberOfLines={1}
+                >Report For:
+              {filter_type == 0 ? "All Records" :
+                    filter_type == 1 ? "Date between " +
+                     this.state.start_date + " and " + this.state.end_date :""
+                  }
+                </Text>
+
+
+
+
+
+
+
               </View>
-            ) : null}
+
+
+
+
+
+              <ScrollView horizontal={true}>
+                <FlatList
+
+                  ListHeaderComponent={this.renderTitle.bind(this)}
+                  stickyHeaderIndices={[0]}
+                  contentContainerStyle={{
+                    paddingBottom: scale(5),
+                    flexGrow: 1,
+                  }}
+                  keyExtractor={(item, index) => index.toString()}
+                  data={this.state.show_list}
+
+                  renderItem={(item, index) => this._renderListItem(item, index)}
+                  bounces={false}
+                  extraData={this.state}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={this.state.refresh}
+                      onRefresh={this.onRefresh.bind(this)}
+                    />
+
+
+                  }
+                  ListEmptyComponent={
+                    <View style={{
+                      borderWidth: scale(0.5),
+                      borderColor: '#ccc'
+
+                    }}>
+                      {this.state.loading == false ? (
+                        <Text style={{
+                          padding: scale(10),
+                          fontSize: scale(12),
+                          textAlignVertical: 'center',
+                          color: '#ccc'
+
+
+                        }}>No Data Found..!!</Text>
+                      ) : null}
+                    </View>
+                  }
+                  //pagination
+
+                  ListFooterComponent={this.renderFooter.bind(this)}
+                  onEndReachedThreshold={0.01}
+                  onMomentumScrollBegin={() => this._onMomentumScrollBegin()}
+                  onEndReached={this.handleLoadMore.bind(this)}
+                  onScroll={this._onScroll}
+                />
+
+              </ScrollView>
+
+
+
+
+
+
+
+
+
+            </View>
+
+
+
+
+
           </View>
 
+          {
+            this.state.show_list.length > 0 ?
+          
 
-      }
+                <TouchableOpacity
+                  onPress={() => {
 
-      {this.renderFooter()}
+                    if (this.state.show_list.length > 0) {
+                      this.requestRunTimePermission()
+                    } else {
+                      alert("No Record Found")
+                    }
 
-    </ScrollView>
+
+                  }}
+                  style={{
+                    width: scale(100),
+                    height: scale(40),
+                    borderRadius: scale(10),
+                    backgroundColor: Color.bgColor,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft:scale(20)
+                  }}
+                >
+                  <Text style={{
+                    fontSize: scale(15),
+                    color: 'white',
+                    fontWeight: 'bold',
+                    width: scale(100),
+                    textAlign: 'center'
+                  }}
+                    numberOfLines={1}
+                  >Export</Text>
+                </TouchableOpacity>
 
 
-{this._filterRender()}
+              : null
+          }
 
 
-{show_list.length > 0 ? this.renderNext() : null}
 
-    {show_list.length > 0 ? this.renderFOB() : null}
 
-     </View>
+
+
+        </ImageBackground>
+      </View>
     );
   }
 }
 
 
-
 const styles = StyleSheet.create({
+  containter: {
+    width: Dimensions.get("window").width, //for full screen
+    height: Dimensions.get("window").height //for full screen
+  },
+  fixed: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0
+  },
+  txt: { fontSize: scale(12), width: scale(300), },
 
-  txt: { fontSize: scale(12), width: '90%' },
-  txth:{fontSize:scale(12),fontWeight:'bold'},
 
   userInput: {
     height: scale(40),
     backgroundColor: 'white',
-    marginBottom: scale(15),
-    borderColor: 'grey',
     borderWidth: scale(1),
-    width:scale(180),
-    marginLeft:scale(30)
-    },
-
-    input: {
-      color: '#000',
-      marginLeft: scale(5),
-      width: '73%',
-      fontSize: scale(12)
-      },
-
-
-  active: {
-    backgroundColor: 'rgba(245,252,255,1)',
-    padding: scale(10),
-
-    marginHorizontal: scale(20),
-    borderTopLeftRadius: scale(10),
-    borderTopRightRadius: scale(10),
-    borderBottomWidth: scale(1),
-    borderColor: '#ddd'
-  },
-  inactive: {
-    backgroundColor: '#fff',
-
-    padding: scale(10),
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 9,
-    },
-    shadowOpacity: 0.48,
-    shadowRadius: 11.95,
-    elevation: 10,
-    marginHorizontal: scale(20),
-    marginVertical: scale(10),
-    borderRadius: scale(10)
-
-  },
-  activeContent: {
-    backgroundColor: 'rgba(245,252,255,1)',
-    padding: scale(10),
-
-    marginHorizontal: scale(20),
-    borderBottomLeftRadius: scale(10),
-    borderBottomRightRadius: scale(10),
-
-  },
-  inactiveContent: {
-    backgroundColor: '#fff',
-    height: scale(0),
-    padding: scale(10),
-    marginHorizontal: scale(20),
-
-
+    width: scale(100),
+    justifyContent: "center",
+    borderRadius: scale(5),
+    borderColor: "#ddd",
+    marginLeft: scale(5)
 
   },
 
-     
- });
+
+  title: {
+    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: '300',
+    marginBottom: 20,
+  },
+  header: {
+    backgroundColor: '#F5FCFF',
+    padding: 10,
+  },
+
+
+
+
+});
 
 
 

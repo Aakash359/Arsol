@@ -12,7 +12,7 @@ import {
   Alert,
   RefreshControl,
   Image,
-  ActivityIndicator,TouchableHighlight
+  ActivityIndicator,TouchableHighlight,ImageBackground,Dimensions
 } from 'react-native';
 
 import {connect} from 'react-redux';
@@ -51,7 +51,7 @@ class CustomerLedgerScreen extends PureComponent {
       customer_value: '',
       start_date: moment(new Date()).format('DD/MM/YYYY'),
       end_date: moment(new Date()).format('DD/MM/YYYY'),
-      filter: false,
+     
 
       pdf_data: [],
     };
@@ -59,19 +59,34 @@ class CustomerLedgerScreen extends PureComponent {
 
   componentDidMount() {
     const {network} = this.props;
+    this._subscribe = this.props.navigation.addListener('focus', () => {
+      if (!network.isConnected) {
+        Snackbar.show({
+          text: msg.noInternet,
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: 'red',
+        });
+      } else {
+        this.setState({ loading: true,
+          refresh: false,
+          onEndReachedCalledDuringMomentum: true,
+          show_list: [],
+          data2: '',
+          customer_list: [],
+          customer_value: '',
+          start_date: moment(new Date()).format('DD/MM/YYYY'),
+          end_date: moment(new Date()).format('DD/MM/YYYY'),
 
-    if (!network.isConnected) {
-      Snackbar.show({
-        text: msg.noInternet,
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: 'red',
-      });
-    } else {
-      this.setState({loading: true}, () => {
-        this.hit_CompanyNameApi();
-        //  this.hit_customer_ledgerApi()
-      });
-    }
+
+          pdf_data: [],
+        }, () => {
+          this.hit_CompanyNameApi();
+
+        });
+      }
+
+    })
+   
   }
 
   renderTableHeader() {
@@ -428,159 +443,7 @@ class CustomerLedgerScreen extends PureComponent {
       });
   }
 
-  _filterRender() {
-    const {customer_value, customer_list} = this.state;
-
-    return (
-      <Modal
-        transparent={true}
-        animationType={'slide'}
-        visible={this.state.filter}
-        onRequestClose={() => {
-          this.setState({filter: false});
-        }}>
-        <View style={{flex: 1}}>
-          <ScrollView
-            style={{backgroundColor: 'rgba(0,0,0,0.5)'}}
-            contentContainerStyle={{
-              flexGrow: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: scale(5),
-            }}>
-            <View>
-              <View
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: scale(5),
-                  width: scale(250),
-                }}>
-                <View
-                  style={{
-                    height: scale(40),
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  <Text
-                    style={{
-                      fontSize: scale(15),
-                      color: '#00B5FF',
-                      fontWeight: '500',
-                    }}
-                    numberOfLines={1}>
-                    Filter Search Result
-                  </Text>
-                </View>
-
-                <View style={{height: scale(2), backgroundColor: '#00B5FF'}} />
-
-                <View style={{padding: scale(5), alignItems: 'center'}}>
-                  <Text
-                    style={{fontSize: scale(12), width: scale(180)}}
-                    numberOfLines={1}>
-                    Customer Name :
-                  </Text>
-                  <View style={styles.userInput}>
-                    <RNPickerSelect
-                      placeholder={{
-                        label: 'Select Customer',
-                        value: '',
-                      }}
-                      items={customer_list}
-                      onValueChange={customer_value =>
-                        this.setState({customer_value})
-                      }
-                      value={customer_value}
-                    />
-                  </View>
-                  <Text
-                    style={{fontSize: scale(12), width: scale(180)}}
-                    numberOfLines={1}>
-                    Date From :
-                  </Text>
-                  <DatePicker
-                    style={{width: scale(180), marginTop: scale(5)}}
-                    date={this.state.start_date}
-                    placeholder="Select Date"
-                    mode={'date'}
-                    format="DD/MM/YYYY"
-                    confirmBtnText="Confirm"
-                    cancelBtnText="Cancel"
-                    showIcon={false}
-                    customStyles={{
-                      placeholderText: {
-                        color: '#565656',
-                      },
-                    }}
-                    minuteInterval={10}
-                    onDateChange={date => {
-                      this.setState({start_date: date});
-                    }}
-                  />
-                  <Text
-                    style={{fontSize: scale(12), width: scale(180)}}
-                    numberOfLines={1}>
-                    Date To :
-                  </Text>
-                  <DatePicker
-                    style={{width: scale(180), marginTop: scale(5)}}
-                    date={this.state.end_date}
-                    placeholder="Select Date"
-                    mode={'date'}
-                    format="DD/MM/YYYY"
-                    confirmBtnText="Confirm"
-                    cancelBtnText="Cancel"
-                    showIcon={false}
-                    customStyles={{
-                      placeholderText: {
-                        color: '#565656',
-                      },
-                    }}
-                    minuteInterval={10}
-                    onDateChange={date => {
-                      this.setState({end_date: date});
-                    }}
-                  />
-                </View>
-
-                <TouchableOpacity
-                  onPress={() => {
-                    if (
-                      (this.state.customer_value != '') &
-                      (this.state.start_date != '') &
-                      (this.state.end_date != '')
-                    ) {
-                      this.onRefresh();
-                    } else {
-                      alert('Select Customer Name');
-                    }
-                  }}>
-                  <View
-                    style={{
-                      backgroundColor: '#00B5FF',
-                      height: scale(40),
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: scale(4),
-                    }}>
-                    <Text
-                      style={{
-                        fontSize: scale(18),
-                        color: '#fff',
-                        fontWeight: 'bold',
-                      }}
-                      numberOfLines={1}>
-                      Apply
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </ScrollView>
-        </View>
-      </Modal>
-    );
-  }
+ 
 
   //refresh
   onRefresh() {
@@ -596,8 +459,9 @@ class CustomerLedgerScreen extends PureComponent {
         {
           refresh: true,
           show_list: [],
-          filter: false,
           loading: false,
+          data2: '',
+          pdf_data: [],
         },
         () => {
           this.hit_customer_ledgerApi();
@@ -719,118 +583,281 @@ class CustomerLedgerScreen extends PureComponent {
       });
   }
 
-  _renderListItem(rowData, index) {
-    console.log(rowData, index);
-    return (
-      <View
-        style={{
-          padding: scale(10),
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 9,
-          },
-          shadowOpacity: 0.48,
-          shadowRadius: 11.95,
 
-          elevation: 20,
-          borderRadius: scale(15),
-          backgroundColor: "#fff",
-          marginHorizontal: scale(20),
-          marginVertical: scale(10)
-        }}
-        key={index}>
-        
-         
+
+
+  //footer
+  renderFooter = () => {
+    const {show_list} = this.state
+   
+    if (this.state.show_list.length > 0)
+    return (
+      <View>
+
+      <View style={{
+        flexDirection: 'row',
+
+        borderWidth: scale(0.5),
+        borderColor: '#ccc',
+        backgroundColor: '#fff'
+      }}>
             <Text style={{
-              fontSize: scale(14), fontWeight: 'bold', fontStyle: 'italic',
-              textTransform: 'capitalize'}} numberOfLines={1}>
-              {rowData.item.particular}
-            </Text>
-          
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
 
-         
-            <Text style={styles.txt} numberOfLines={1}>
-             Date: {rowData.item.date}
-            </Text>
-          
+            }}
+              numberOfLines={2}
+            ></Text>
+            <Text style={{
 
-         
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
 
-          
-            <Text style={styles.txt} numberOfLines={1}>
-            Voucher Type:{rowData.item.voucher}
-            </Text>
-          
+            }}
+              numberOfLines={2}
+            ></Text>
+            <Text style={{
 
-          
-            <Text style={styles.txt} numberOfLines={1}>
-            Desc:{rowData.item.description}
-            </Text>
-         
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+
+            }}
+              numberOfLines={2}
+            ></Text>
+            <Text style={{
+
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+
+            }}
+              numberOfLines={2}
+            ></Text>
+            <Text style={{
+
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+
+            }}
+              numberOfLines={2}
+        >{show_list.reduce((prev, next) => prev + parseInt(next.debit), 0)}</Text>
+            <Text style={{
+
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+
+            }}
+              numberOfLines={2}
+        >{show_list.reduce((prev, next) => prev + parseInt(next.credit), 0)}</Text>
+
+     </View>
+      <View style={{
+          flexDirection: 'row',
+
+          borderWidth: scale(0.5),
+          borderColor: '#ccc',
+          backgroundColor: '#fff'
+        }}>
+          <Text style={{
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+
+          }}
+            numberOfLines={2}
+          ></Text>
+          <Text style={{
+
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+
+          }}
+            numberOfLines={2}
+          >Dr</Text>
+          <Text style={{
+
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+
+          }}
+            numberOfLines={2}
+          >Closing Balance</Text>
+          <Text style={{
+
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+
+          }}
+            numberOfLines={2}
+          ></Text>
+          <Text style={{
+
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+
+          }}
+            numberOfLines={2}
+          ></Text>
+          <Text style={{
+
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+
+          }}
+            numberOfLines={2}
+          >{show_list.reduce((prev, next) => prev + parseInt(next.debit), 0) - show_list.reduce((prev, next) => prev + parseInt(next.credit), 0)}</Text>
+
+        </View>
         <View style={{
-          borderRadius: scale(3),
-          borderColor: '#73C6B6',
-          padding: scale(5),
-       
-         
-          borderWidth: scale(1),
-          borderRadius: scale(10),
-          marginTop: scale(5)
+          flexDirection: 'row',
 
+          borderWidth: scale(0.5),
+          borderColor: '#ccc',
+          backgroundColor: '#fff'
         }}>
-        <View style={{flexDirection:'row',
-        width:'75%',
-        justifyContent: 'space-between',
+          <Text style={{
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
 
-        }}>
-            <Text numberOfLines={1}>
-              Debit
-          </Text>
-            <Text numberOfLines={1}>
-              {rowData.item.debit}
-            </Text>
+          }}
+            numberOfLines={2}
+          ></Text>
+          <Text style={{
+
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+
+          }}
+            numberOfLines={2}
+          ></Text>
+          <Text style={{
+
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+
+          }}
+            numberOfLines={2}
+          ></Text>
+          <Text style={{
+
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+
+          }}
+            numberOfLines={2}
+          ></Text>
+          <Text style={{
+
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+
+          }}
+            numberOfLines={2}
+          >{show_list.reduce((prev, next) => prev + parseInt(next.debit), 0)}</Text>
+          <Text style={{
+
+            padding: scale(10),
+            width: scale(100),
+            fontWeight: 'bold',
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+
+          }}
+            numberOfLines={2}
+          >{show_list.reduce((prev, next) => prev + parseInt(next.credit), 0) + show_list.reduce((prev, next) => prev + parseInt(next.debit), 0) - show_list.reduce((prev, next) => prev + parseInt(next.credit), 0)}</Text>
+
         </View>
-        
- <View style={{flexDirection:'row',
-        
-        justifyContent: 'space-between',
+          </View>
+            )
+    return (<View style={{ marginBottom: scale(100), }} />)
 
-        }}>
-            <Text numberOfLines={1}>
-              Credit
-          </Text>
+   
+  };
 
-            <Text numberOfLines={1}>
-              {rowData.item.credit}
-            </Text>
 
-        </View>
-          
-        </View>
-          
-            
-          
-
-          
-          
-          
-       
-      </View>
-    );
-  }
-
-  FlatListItemSeparator = () => {
+  renderHeader() {
     return (
       <View
         style={{
-          height: scale(5),
-          width: '100%',
-          
+          backgroundColor: Color.bgColor,
+          borderRadius: scale(5),
+          justifyContent: "center",
+          alignItems: "center",
+          padding: scale(10),
+          width: scale(200),
+          alignSelf: 'center'
         }}
-      />
-    );
-  };
+      >
+        <Text style={{
+          fontSize: scale(18),
+          color: '#000',
 
   renderHeader(){
     const {data2}=this.state
@@ -861,394 +888,656 @@ class CustomerLedgerScreen extends PureComponent {
     return header_View;
   }
 
-   // 
-   renderNext(){
-    const {
-    show_list
-    }=this.state
-
-
-    var footer_View = (
-  
-        <View
-          style={{
-            width: '100%',
-            alignSelf: 'center',
-
-            borderTopWidth: 1,
-            borderLeftWidth: 1,
-            borderRightWidth: 1,
-            borderBottomWidth:1,
-            borderTopLeftRadius: scale(7),
-            borderTopRightRadius: scale(7),
-            borderColor: 'grey',
-            padding: scale(3),
-          
+  renderTitle() {
     
-          
-          }}>
-          
-          
-            <View style={{margin:scale(3)}}>
-
-            <View style={{flexDirection:'row',justifyContent:'space-between',alignSelf:'flex-end',width:scale(100)}}>
-            <Text style={{fontSize:scale(12),color:'#000',fontWeight:'bold'}}>Debit</Text>
-            <Text style={{fontSize:scale(12),color:'#000',fontWeight:'bold'}}>Credit</Text>
-            </View>
-            <View style={{height:scale(1),backgroundColor:"#000"}}/>
-            <View style={{flexDirection:'row',justifyContent:'space-between',alignSelf:'flex-end',width:scale(100)}}>
-            <Text style={{fontSize:scale(12),color:'#000',fontWeight:'bold'}}> {show_list.reduce((prev, next) => prev + parseInt(next.debit), 0)}</Text>
-            <Text style={{fontSize:scale(12),color:'#000',fontWeight:'bold'}}> {show_list.reduce((prev, next) => prev + parseInt(next.credit), 0)}</Text>
-            </View>
-
-            <View style={{flexDirection:'row',justifyContent:'space-between',}}>
-            <Text style={{fontSize:scale(12),color:'#000',fontWeight:'bold'}}>Dr Closing Balance </Text>
-                <View style={{flexDirection:'row',justifyContent:'space-between',alignSelf:'flex-end',width:scale(100)}}>
-            <Text> </Text>
-            <Text style={{fontSize:scale(12),color:'#000',fontWeight:'bold'}}>{show_list.reduce((prev, next) => prev + parseInt(next.debit), 0)-show_list.reduce((prev, next) => prev + parseInt(next.credit), 0)}</Text>
-            </View>
-            </View>
-
-            <View style={{height:scale(1),backgroundColor:"#000"}}/>
-            <View style={{flexDirection:'row',justifyContent:'space-between',alignSelf:'flex-end',width:scale(100)}}>
-            <Text style={{fontSize:scale(12),color:'#000',fontWeight:'bold'}}> {show_list.reduce((prev, next) => prev + parseInt(next.debit), 0)}</Text>
-            <Text style={{fontSize:scale(12),color:'#000',fontWeight:'bold'}}>{show_list.reduce((prev, next) => prev + parseInt(next.credit), 0)+show_list.reduce((prev, next) => prev + parseInt(next.debit), 0)-show_list.reduce((prev, next) => prev + parseInt(next.credit), 0)}</Text>
-            </View>
-          
-
-                
-
-
-              
-             
-          
-
-            </View>
-          
-
-          
-          
-
-        
-        </View>
-      
-    );
-    return footer_View;
-  }
-
-  renderHeader() {
     return (
-      <View
-        style={{
-          height: scale(50), backgroundColor: "#80d4ff",
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 9,
-          },
-          shadowOpacity: 0.48,
-          shadowRadius: 11.95,
+      <View style={{
+        flexDirection: 'row',
 
-          elevation: 20,
-          borderRadius: scale(15),
-          margin: scale(7),
-          justifyContent: "center",
-          padding: scale(10)
+        borderWidth: scale(0.5),
+        borderColor: '#ccc',
+        backgroundColor: '#fff'
+      }}>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
 
         }}
-      >
+          numberOfLines={2}
+        >Date</Text>
 
-        <View style={{ justifyContent: 'center', alignContent: 'center' }}>
-          <TouchableHighlight
-            activeOpacity={1}
-            underlayColor={'#ddd'}
-            onPress={() => this.props.navigation.toggleDrawer()}
-            style={{
-              width: scale(40), height: scale(40),
-              alignItems: "center",
-              justifyContent: 'center',
-              borderRadius: scale(20)
-            }}
-          >
+        <Text style={{
 
-            <Image source={Images.menu} style={{
-              width: scale(20), height: scale(20),
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+    
+        }}
+          numberOfLines={2}
+        >Particulars</Text>
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+     
+        }}
+          numberOfLines={2}
+        >Voucher Type</Text>
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+  
+        }}
+          numberOfLines={2}
+        >Desc</Text>
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+       
+        }}
+          numberOfLines={2}
+        >Debit</Text>
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+         
+        }}
+          numberOfLines={2}
+        >Credit</Text>
+
+        
 
 
-            }} />
 
-          </TouchableHighlight>
-
-          <Text style={{
-            position: "absolute",
-            alignSelf: "center",
-            fontSize: scale(18),
-            color: "#fff",
-            fontWeight: 'bold'
-          }}>Customer Ledger</Text>
-
-          <TouchableHighlight
-            activeOpacity={1}
-            underlayColor={'#ddd'}
-            onPress={() => { this.printHTML() }}
-            style={{
-              position: "absolute", right:35, width: scale(40), height: scale(40),
-              alignItems: "center",
-              justifyContent: 'center',
-              borderRadius: scale(20)
-            }}
-          >
-
-            <Image source={Images.print} style={{
-              width: scale(20), height: scale(20),
-
-
-            }} />
-
-          </TouchableHighlight>
-
-          <TouchableHighlight
-            activeOpacity={1}
-            underlayColor={'#ddd'}
-            onPress={() => { this.setState({ filter: true }) }}
-            style={{
-              position: "absolute", right: 0, width: scale(40), height: scale(40),
-              alignItems: "center",
-              justifyContent: 'center',
-              borderRadius: scale(20)
-            }}
-          >
-
-            <Image source={Images.filterw} style={{
-              width: scale(20), height: scale(20),
-
-
-            }} />
-
-          </TouchableHighlight>
-        </View>
 
       </View>
+    )
+  }
+  _renderListItem(rowData, index) {
+    
+    return (
+
+      <View style={{
+        flexDirection: 'row',
+        borderWidth: scale(0.5),
+        borderColor: '#ccc'
+
+      }}
+        key={rowData.index}
+      >
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+ 
+        }}
+          numberOfLines={2}
+        >{rowData.item.date}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+   
+        }}
+          numberOfLines={2}
+        >{rowData.item.particular}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+       
+        }}
+          numberOfLines={2}
+        >{rowData.item.voucher}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+  
+        }}
+          numberOfLines={2}
+        >{rowData.item.description}</Text>
+
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+  
+        }}
+          numberOfLines={2}
+        >{rowData.item.debit}</Text>
+
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+
+        }}
+          numberOfLines={2}
+        >{rowData.item.credit}</Text>
+
+      
+
+      </View>
+
+
+
+
+
 
     )
   }
 
-  _handleAdd(item) {
-    const { navigation, network } = this.props;
 
-
-    if (item == 'print') {
-      this.printHTML()
-
-    } else if (item == 'export') {
-      if (this.state.show_list.length > 0) {
-        this.requestRunTimePermission()
-      } else {
-        alert("No Record Found")
-      }
-    }
-
-    if (network.isConnected) {
-
-    } else {
-      Snackbar.show({
-        text: msg.noInternet,
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: "red"
-      });
-    }
-  }
-
-  renderFOB() {
-
-    return (
-      <TouchableOpacity activeOpacity={0.5}
-        style={{
-          position: 'absolute',
-          width: scale(50),
-          height: scale(50),
-          alignItems: 'center',
-          justifyContent: 'center',
-          right: 50,
-          bottom: 250,
-          backgroundColor: "#fff",
-          borderRadius: scale(25),
-          elevation: 20,
-          shadowColor: "#000000",
-          shadowOpacity: 0.8,
-          shadowRadius: 2,
-          shadowOffset: {
-            height: 1,
-            width: 0
-          }
-
-        }}
-        onPress={() => {
-          if (this.state.show_list.length > 0) {
-            this.requestRunTimePermission()
-          } else {
-            alert("No Record Found")
-          }
-
-        }}
-      >
-
-        <Image source={Images.excel}
-
-          style={{
-            resizeMode: 'contain',
-            width: 50,
-            height: 50,
-          }} />
-
-      </TouchableOpacity>
-    );
-  }
 
   render() {
- const{show_list}=this.state
-    const actions = [
-      {
-        text: 'Print pdf',
-        icon: Images.print,
-        name: 'print',
-        position: 1,
-        textStyle: { fontSize: scale(10) },
-        buttonSize: scale(30),
-        textContainerStyle: {
-          height: scale(30),
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-      },
-      {
-        text: 'Export Excel',
-        icon: Images.file,
-        name: 'export',
+    const { customer_list,customer_value ,data2} = this.state;
 
-        position: 2,
-        textStyle: { fontSize: scale(10) },
-        buttonSize: scale(30),
-        textContainerStyle: {
-          height: scale(30),
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-      },
 
-    ];
 
     return (
-      <View style={{
-        justifyContent: "center", flex: 1,
-        backgroundColor: "#fff"}}>
-      
-        <LogoSpinner loading={this.state.loading} />
+      <View>
+        <ImageBackground
+          style={[styles.fixed, styles.containter]}
+          source={Images.listbg}>
+          <TouchableHighlight
+            activeOpacity={1}
+            underlayColor={'#ddd'}
+            onPress={() =>
+              this.props.navigation.toggleDrawer()}
+            style={{
+              width: scale(35), height: scale(35),
+              alignItems: "center",
+              justifyContent: 'center',
+              backgroundColor: Color.headerTintColor
+            }}
+          >
+            <Image source={Images.menu}
+              style={{
+                width: scale(20),
+                height: scale(20),
+              }} />
+          </TouchableHighlight>
 
-        {this._filterRender()}
-  
-        <FlatList
-        
-          contentContainerStyle={{ paddingBottom: scale(5), flexGrow: 1 }}
-            
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={this.renderHeader.bind(this)}
-          stickyHeaderIndices={[0]}
-       
-          keyExtractor={(item, index) => index.toString()}
-          data={this.state.show_list}
-          ItemSeparatorComponent={this.FlatListItemSeparator}
-          renderItem={item => this._renderListItem(item)}
-          bounces={false}
-          extraData={this.state}
-          refreshControl={
-            <RefreshControl
-              refreshing={this.state.refresh}
-              onRefresh={this.onRefresh.bind(this)}
-            />
-          }
-          ListEmptyComponent={
-            <View
-              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-              {this.state.loading == false ? (
-                <View
-                  style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <View
-                    style={{
-                      backgroundColor: '#ddd',
-                      width: scale(80),
-                      height: scale(80),
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: scale(80) / 2,
-                      borderWidth: 2,
-                      borderColor: '#AED581',
-                    }}>
-                    <Image
-                      source={Images.logo}
-                      style={{
-                        resizeMode: 'contain',
-                        width: scale(50),
-                        height: scale(50),
+          {this.renderHeader()}
+
+          <LogoSpinner loading={this.state.loading} />
+
+
+
+          <View
+            style={{
+              padding: scale(10),
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 9,
+              },
+              shadowOpacity: 0.48,
+              shadowRadius: 11.95,
+
+              elevation: 20,
+              borderRadius: scale(15),
+              backgroundColor: "#fff",
+              marginHorizontal: scale(10),
+              marginVertical: scale(20),
+              height: '70%'
+            }}
+
+          >
+            <View style={{
+              borderWidth: 1,
+              height: '100%',
+              borderColor: '#ccc',
+              borderRadius: scale(5),
+              paddingBottom: scale(5)
+
+            }}>
+              <View
+                style={{
+                  padding: scale(5),
+                  backgroundColor: '#f1f3f6'
+                }}
+              >
+
+                <View style={{
+                  flexDirection: 'row',
+                  marginVertical: scale(5),
+                  alignItems: "center"
+
+                }}>
+                  <Text style={{
+                    fontSize: scale(12),
+                    fontWeight: 'bold',
+                    width: scale(100)
+                  }}
+                    numberOfLines={2}
+                  >Customer Name:</Text>
+
+                  <View style={styles.userInput}>
+                    <RNPickerSelect
+                      placeholder={{
+                        label: "Select Customer Name",
+                        value: "",
+                        color: 'black',
+                        fontSize: scale(12),
+                        fontWeight: 'bold',
                       }}
+                      style={{
+                        inputIOS: styles.inputIOS,
+                        inputAndroid: styles.inputAndroid,
+                      }}
+                      items={customer_list}
+                      onValueChange={customer_value =>
+                        this.setState({ customer_value })
+                      }
+                      value={customer_value}
                     />
                   </View>
 
-                  <Text
-                    style={{
-                      fontSize: scale(15),
-                      width: scale(150),
-                      textAlign: 'center',
-                      marginTop: scale(5),
-                    }}>
-                    No Record Found
-                  </Text>
+                 
+
+                 
+
+
+
+
                 </View>
-              ) : null}
+
+
+
+                <View style={{
+                  flexDirection: 'row',
+                  marginTop: scale(5),
+
+                  alignItems: "center"
+                }}>
+
+                  <View style={{ flexDirection: "row", }}>
+                    <DatePicker
+                      style={{ width: scale(100), }}
+                      date={this.state.start_date}
+                      placeholder="Select Start Date"
+                      mode={'date'}
+                      format="DD/MM/YYYY"
+                      confirmBtnText="Confirm"
+                      cancelBtnText="Cancel"
+                      showIcon={false}
+                      minuteInterval={10}
+                      onDateChange={(date) => { this.setState({ start_date: date }) }}
+
+                    />
+                    <DatePicker
+                      style={{ width: scale(100), marginLeft: scale(5) }}
+                      date={this.state.end_date}
+                      placeholder="Select End Date"
+                      mode={'date'}
+                      format="DD/MM/YYYY"
+                      confirmBtnText="Confirm"
+                      cancelBtnText="Cancel"
+                      showIcon={false}
+                      minuteInterval={10}
+                      onDateChange={(date) => { this.setState({ end_date: date }) }}
+
+                    />
+                  </View>
+
+                  
+
+
+
+
+
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      this.onRefresh()
+                    }}
+
+                  >
+                    <Text style={{
+                      textAlign: 'center',
+                      fontSize: scale(10),
+                      padding: scale(5),
+                      maxWidth: scale(100),
+                      backgroundColor: '#0095DF',
+                      borderRadius: scale(5),
+                      color: '#fff',
+                      marginLeft: scale(10),
+                      height: scale(40),
+                      textAlignVertical: "center",
+                      minWidth: scale(60)
+                    }}
+                      numberOfLines={1}
+                    >Search</Text>
+                  </TouchableOpacity>
+                </View>
+
+
+              
+
+
+
+
+
+
+
+              </View>
+
+              {this.state.show_list.length>0?
+              
+                <View style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '100%',
+                  padding: scale(10)
+                }}>
+                  <Text style={{
+                    width: scale(200),
+                    textAlign: 'center',
+                    fontSize: scale(12),
+                    fontWeight: 'bold'
+                  }}
+                    numberOfLines={2}
+                  >{data2.company_name}</Text>
+
+                  <Text style={{
+                    width: scale(200),
+                    textAlign: 'center',
+                    fontSize: scale(12),
+
+                  }}
+                    numberOfLines={2}
+                  >{data2.cust_address}</Text>
+
+                  <Text style={{
+                    width: scale(200),
+                    textAlign: 'center',
+                    fontSize: scale(12),
+
+                  }}
+                    numberOfLines={2}
+                  >{data2.cust_zip}</Text>
+
+
+                  <Text style={{
+                    width: scale(200),
+                    textAlign: 'center',
+                    fontSize: scale(12),
+
+                  }}
+                    numberOfLines={2}
+                  >Leader Account-{data2.ledger_account}</Text>
+
+
+
+                  <Text style={{
+                    width: scale(200),
+                    textAlign: 'center',
+                    fontSize: scale(12),
+
+                  }}
+                    numberOfLines={2}
+                  >{this.state.start_date} to {this.state.end_date}</Text>
+
+                </View>
+              :null
+              
+              }
+
+             
+
+
+
+
+
+              <ScrollView horizontal={true}>
+                <FlatList
+
+                  ListHeaderComponent={this.renderTitle.bind(this)}
+                  stickyHeaderIndices={[0]}
+                  contentContainerStyle={{
+                    paddingBottom: scale(5),
+                    flexGrow: 1,
+                  }}
+                  keyExtractor={(item, index) => index.toString()}
+                  data={this.state.show_list}
+
+                  renderItem={(item, index) => this._renderListItem(item, index)}
+                  bounces={false}
+                  extraData={this.state}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={this.state.refresh}
+                      onRefresh={this.onRefresh.bind(this)}
+                    />
+
+
+                  }
+                  ListEmptyComponent={
+                    <View style={{
+                      borderWidth: scale(0.5),
+                      borderColor: '#ccc'
+
+                    }}>
+                      {this.state.loading == false ? (
+                        <Text style={{
+                          padding: scale(10),
+                          fontSize: scale(12),
+                          textAlignVertical: 'center',
+                          color: '#ccc'
+
+
+                        }}>{this.state.customer_value!=""?
+                            "No Data Found..!!" : "Please select Customer..!!"
+                           }</Text>
+                      ) : null}
+                    </View>
+                  }
+                  //pagination
+
+                  ListFooterComponent={this.renderFooter.bind(this)}
+                  onEndReachedThreshold={0.01}
+            
+                />
+
+              </ScrollView>
+
+
+
+
+
+
+
+
+
             </View>
-          }
-          //pagination
-
-        //  ListFooterComponent={show_list.length > 0 ? this.renderNext() : null}
-          
-          //     onEndReachedThreshold={0.01}
-          //     onMomentumScrollBegin={() => this._onMomentumScrollBegin()}
-          //     onEndReached={this.handleLoadMore.bind(this)}
-        />
 
 
-        
-        {show_list.length > 0 ? this.renderNext() : null}
-        {show_list.length > 0 ? this.renderFOB() : null}
 
+
+
+          </View>
+
+          {
+            this.state.show_list.length>0?
+            <View
+            style={{
+            flexDirection: "row",
+            justifyContent: 'space-between',
+            width: scale(250),
+            alignSelf: "center"
+
+          }}
+          >
+            <TouchableOpacity
+            onPress={() => {
+
+              if (this.state.show_list.length > 0) {
+                this.printHTML()
+              } else {
+                alert("No Record Found")
+              }
+            }}
+            style={{
+              width: scale(100),
+              height: scale(40),
+              borderRadius: scale(10),
+              backgroundColor: Color.headerTintColor,
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <Text style={{
+              fontSize: scale(15),
+              color: 'white',
+              fontWeight: 'bold',
+              width: scale(100),
+              textAlign: 'center'
+            }}
+              numberOfLines={1}
+            >Print</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+
+              if (this.state.show_list.length > 0) {
+                this.requestRunTimePermission()
+              } else {
+                alert("No Record Found")
+              }
+
+
+            }}
+            style={{
+              width: scale(100),
+              height: scale(40),
+              borderRadius: scale(10),
+              backgroundColor: Color.bgColor,
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            <Text style={{
+              fontSize: scale(15),
+              color: 'white',
+              fontWeight: 'bold',
+              width: scale(100),
+              textAlign: 'center'
+            }}
+              numberOfLines={1}
+            >Export</Text>
+          </TouchableOpacity>
+
+
+        </View>:null
+ }
+
+
+
+
+
+
+        </ImageBackground>
       </View>
     );
   }
 }
 
+
 const styles = StyleSheet.create({
-  txt: { fontSize: scale(12) },
+  containter: {
+    width: Dimensions.get("window").width, //for full screen
+    height: Dimensions.get("window").height //for full screen
+  },
+  fixed: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0
+  },
+  txt: { fontSize: scale(12), width: scale(300), },
 
 
   userInput: {
     height: scale(40),
     backgroundColor: 'white',
-
-    borderColor: 'grey',
     borderWidth: scale(1),
-    width: scale(180),
+    width: scale(150),
+    justifyContent: "center",
+    borderRadius: scale(5),
+    borderColor: "#ddd",
+    marginLeft: scale(5)
   },
 
-  input: {
-    color: '#000',
 
-    width: '73%',
+  title: {
+    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: '300',
+    marginBottom: 20,
+  },
+  header: {
+    backgroundColor: '#F5FCFF',
+    padding: 10,
+  },
+  inputIOS: {
     fontSize: scale(12),
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(10),
+    color: 'black',
+    paddingRight: scale(40),
   },
+  inputAndroid: {
+    fontSize: scale(12),
+    paddingHorizontal: scale(10),
+    paddingVertical: scale(8),
+    color: 'black',
+    paddingRight: scale(40),
+  },
+
+
+
 });
 
 CustomerLedgerScreen.defaultProps = {
