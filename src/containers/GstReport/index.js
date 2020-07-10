@@ -47,10 +47,10 @@ class GstReportScreen extends PureComponent {
       onEndReachedCalledDuringMomentum: true,
       page:0,
       show_list:[],
-      filter:false,
+      
 
-      ch_all:true,
-      ch_invoice:false,
+      ch_all:false,
+      ch_invoice:true,
     
       start_date:moment(new Date()).format('DD/MM/YYYY'),
       end_date:moment(new Date()).format('DD/MM/YYYY'),
@@ -81,10 +81,11 @@ class GstReportScreen extends PureComponent {
         total_sgst9:0,
         total_sgst14:0,
         total_val:0,
+
+        filter_type:1
   
 
-     pdf_data:[],
-      activeSections: [],
+
      }
 
  }
@@ -92,21 +93,67 @@ class GstReportScreen extends PureComponent {
  componentDidMount() {
   const { network} = this.props;
 
-
-  if(!network.isConnected){
+this._subscribe = this.props.navigation.addListener('focus', () => {
+  if (!network.isConnected) {
     Snackbar.show({
       text: msg.noInternet,
       duration: Snackbar.LENGTH_SHORT,
       backgroundColor: "red"
     });
-  }else{
-    this.setState({loading:true},()=>{
-   
-      
+  } else {
+    this.setState({ loading: true,
+      refresh: false,
+      load_more: false,
+      onEndReachedCalledDuringMomentum: true,
+      page: 0,
+      show_list: [],
+
+
+      ch_all: false,
+      ch_invoice: true,
+
+      start_date: moment(new Date()).format('DD/MM/YYYY'),
+      end_date: moment(new Date()).format('DD/MM/YYYY'),
+
+      totaltax_val: 0,
+      totaltax0: 0,
+      totaltax2: 0,
+      totaltax5: 0,
+      totaltax12: 0,
+      totaltax18: 0,
+      totaltax28: 0,
+      total_igst0: 0,
+      total_igst2: 0,
+      total_igst5: 0,
+      total_igst12: 0,
+      total_igst18: 0,
+      total_igst28: 0,
+      total_cgst0: 0,
+      total_cgst1: 0,
+      total_cgst2_5: 0,
+      total_cgst6: 0,
+      total_cgst9: 0,
+      total_cgst14: 0,
+      total_sgst0: 0,
+      total_sgst1: 0,
+      total_sgst2_5: 0,
+      total_sgst6: 0,
+      total_sgst9: 0,
+      total_sgst14: 0,
+      total_val: 0,
+
+      filter_type: 1
+    
+    }, () => {
+
+
 
       this.hit_gst_reportsApi()
-   
-    })}
+
+    })
+  }
+})
+
   }
 
   
@@ -261,17 +308,19 @@ class GstReportScreen extends PureComponent {
 }
 
  _checkbox_fun(val){
-   if(val.label=="All"){
+   if(val == "0"){
      this.setState({
       ch_all:true,
       ch_invoice:false,
       start_date:moment(new Date()).format('DD/MM/YYYY'),
       end_date:moment(new Date()).format('DD/MM/YYYY'),
      })
-   }else if(val.label=="Invoice Period"){
+   }else if(val == "1"){
     this.setState({
       ch_all:false,
       ch_invoice:true,
+      start_date:moment(new Date()).format('DD/MM/YYYY'),
+      end_date:moment(new Date()).format('DD/MM/YYYY'),
      })}
    
  }
@@ -459,6 +508,35 @@ borderRadius: scale(4),
           load_more:false,
           page: 0,
           show_list: [],
+          totaltax_val: 0,
+          totaltax0: 0,
+          totaltax2: 0,
+          totaltax5: 0,
+          totaltax12: 0,
+          totaltax18: 0,
+          totaltax28: 0,
+          total_igst0: 0,
+          total_igst2: 0,
+          total_igst5: 0,
+          total_igst12: 0,
+          total_igst18: 0,
+          total_igst28: 0,
+          total_cgst0: 0,
+          total_cgst1: 0,
+          total_cgst2_5: 0,
+          total_cgst6: 0,
+          total_cgst9: 0,
+          total_cgst14: 0,
+          total_sgst0: 0,
+          total_sgst1: 0,
+          total_sgst2_5: 0,
+          total_sgst6: 0,
+          total_sgst9: 0,
+          total_sgst14: 0,
+          total_val: 0,
+
+
+
         },
         () => {
           this.hit_gst_reportsApi();
@@ -472,6 +550,7 @@ borderRadius: scale(4),
     const {user_id,user_type} = this.props
     const {page,start_date,end_date,} = this.state
     var filter_type = this.filter_fun()
+    this.setState({ filter_type: filter_type })
     ArsolApi.GstReports_api(user_id,user_type,
       filter_type,
       start_date,
@@ -657,6 +736,34 @@ borderRadius: scale(4),
 
   //footer
   renderFooter = () => {
+    const { totaltax_val,
+      totaltax0,
+      totaltax2,
+      totaltax5,
+      totaltax12,
+      totaltax18,
+      totaltax28,
+      total_igst0,
+      total_igst2,
+      total_igst5,
+      total_igst12,
+      total_igst18,
+      total_igst28,
+      total_cgst0,
+      total_cgst1,
+      total_cgst2_5,
+      total_cgst6,
+      total_cgst9,
+      total_cgst14,
+      total_sgst0,
+      total_sgst1,
+      total_sgst2_5,
+      total_sgst6,
+      total_sgst9,
+      total_sgst14,
+      total_val
+    } = this.state
+
     if (!this.state.load_more) return (
 
       <View>
@@ -689,11 +796,10 @@ borderRadius: scale(4),
                 width: scale(100),
                 fontWeight: 'bold',
                 fontSize: scale(12),
-
+                textAlign: 'center',
                 textAlignVertical: 'center',
                 borderColor: '#ddd',
-                borderRightWidth: scale(1),
-                textAlign: 'right'
+                borderRightWidth: scale(1)
               }}
                 numberOfLines={2}
               >Total:</Text>
@@ -723,102 +829,441 @@ borderRadius: scale(4),
               }}
                 numberOfLines={2}
               ></Text>
-              <Text style={{
 
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_taxable), 0)}</Text>
-              <Text style={{
+              {
+                totaltax_val > 0 ?
+                  <Text style={{
 
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_igst), 0)}</Text>
-              <Text style={{
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax_val}</Text> : null}
+              {
+                totaltax0 > 0 ?
+                  <Text style={{
 
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_cgst), 0)}</Text>
-              <Text style={{
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax0}</Text>
+                  : null}
+              {
+                totaltax2 > 0 ?
+                  <Text style={{
 
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_sgst), 0)}</Text>
-              <Text style={{
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax2}</Text>
+                  : null}
 
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.total_amount), 0)}</Text>
+              {
+                totaltax5 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax5}</Text>
+                  : null}
+
+              {
+                totaltax12 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax12}</Text>
+                  : null}
+
+              {
+                totaltax18 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax18}</Text>
+                  : null}
+
+              {
+                totaltax28 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{totaltax28}</Text>
+                  : null}
+
+              {/* 0 % */}
+              {
+                total_igst0 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst0}</Text>
+                  : null}
+
+              {
+                total_cgst0 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst0}</Text>
+                  : null}
+
+              {
+                total_sgst0 > 0 ?
+
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst0}</Text>
+                  : null}
+
+              {/* 2 % */}
+
+              {
+                total_igst2 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst2}</Text>
+                  : null}
+              {
+                total_cgst1 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst1}</Text>
+                  : null}
+
+              {
+                total_sgst1 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst1}</Text>
+                  : null}
+
+              {/* 5% */}
+
+              {
+                total_igst5 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst5}</Text> : null}
+              {
+                total_cgst2_5 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst2_5}</Text> : null}
+              {
+                total_sgst2_5 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst2_5}</Text> : null}
 
 
-              <Text style={{
 
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              ></Text>
 
-              <Text style={{
+              {/* 12 % */}
 
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
 
-              }}
-                numberOfLines={2}
-              ></Text>
+              {
+                total_igst12 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst12}</Text> : null}
+              {
+                total_cgst6 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst6}</Text> : null}
+              {
+                total_sgst6 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst6}</Text> : null}
+
+
+              {/* 18 % */}
+
+
+              {
+                total_igst18 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst18}</Text> : null}
+              {
+                total_cgst9 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst9}</Text> : null}
+              {
+                total_sgst9 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst9}</Text> : null}
+
+
+              {/* 28 % */}
+
+              {
+                total_igst28 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_igst28}</Text> : null}
+              {
+                total_cgst14 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_cgst14}</Text> : null}
+              {
+                total_sgst14 > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                  }}
+                    numberOfLines={2}
+                  >{total_sgst14}</Text> : null}
+
+              {
+                total_val > 0 ?
+                  <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+
+                  }}
+                    numberOfLines={2}
+                  >{total_val}</Text> : null}
 
 
             </View>
@@ -871,6 +1316,33 @@ borderRadius: scale(4),
   }
 
   renderTitle() {
+    const { totaltax_val,
+      totaltax0,
+      totaltax2,
+      totaltax5,
+      totaltax12,
+      totaltax18,
+      totaltax28,
+      total_igst0,
+      total_igst2,
+      total_igst5,
+      total_igst12,
+      total_igst18,
+      total_igst28,
+      total_cgst0,
+      total_cgst1,
+      total_cgst2_5,
+      total_cgst6,
+      total_cgst9,
+      total_cgst14,
+      total_sgst0,
+      total_sgst1,
+      total_sgst2_5,
+      total_sgst6,
+      total_sgst9,
+      total_sgst14,
+      total_val
+    } = this.state
     return (
       <View style={{
         flexDirection: 'row',
@@ -932,19 +1404,23 @@ borderRadius: scale(4),
           numberOfLines={2}
         >GST Number</Text>
 
-        <Text style={{
+        {
+          totaltax_val > 0 ?
+            <Text style={{
 
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >Taxable Value</Text>
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >Taxable Value</Text>:null}
+        {
+          totaltax0 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -958,6 +1434,9 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >Taxable Value (0%)</Text>
+         :null} 
+        {
+          totaltax2 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -971,6 +1450,10 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >Taxable Value (2%)</Text>
+       :null}
+       
+        {
+          totaltax5 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -984,7 +1467,11 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >Taxable Value (5%)</Text>
-        <Text style={{
+       :null}
+
+       {
+          totaltax12 > 0 ?
+   <Text style={{
 
           padding: scale(10),
           width: scale(100),
@@ -997,6 +1484,10 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >Taxable Value (12%)</Text>
+            : null}
+
+        {
+          totaltax18 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1010,6 +1501,10 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >Taxable Value (18%)</Text>
+      :null}
+      
+        {
+          totaltax28 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1023,8 +1518,11 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >Taxable Value (28%)</Text>
+        :null}
 
 {/* 0 % */}
+        {
+          total_igst0 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1038,6 +1536,10 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >IGST (0%)</Text>
+          :null}
+      
+        {
+          total_cgst0 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1051,6 +1553,11 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >CGST (0%)</Text>
+        :null}
+
+        {
+              total_sgst0 > 0 ?
+        
         <Text style={{
 
           padding: scale(10),
@@ -1064,9 +1571,12 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >SGST (0%)</Text>
+        :null}
 
         {/* 2 % */}
 
+         {
+          total_igst2 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1080,6 +1590,9 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >IGST (2%)</Text>
+        :null}
+        {
+              total_cgst1 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1093,6 +1606,10 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >CGST (1%)</Text>
+      :null}
+      
+        {
+          total_sgst1 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1106,8 +1623,12 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >SGST (1%)</Text>
+          :null}
 
         {/* 5% */}
+
+             {
+              total_igst5 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1120,7 +1641,9 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >IGST (5%)</Text>
+        >IGST (5%)</Text>:null}
+        {
+          total_cgst2_5 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1133,7 +1656,9 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >CGST (2.5%)</Text>
+        >CGST (2.5%)</Text>:null}
+             {
+          total_sgst2_5 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1146,51 +1671,115 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >SGST (2.5%)</Text>
+        >SGST (2.5%)</Text>:null}
+
+
+       
+
+        {/* 12 % */}
+
+
+        {
+          total_igst12 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >IGST (12%)</Text>:null}
+        {
+          total_cgst6 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >CGST (6%)</Text>:null}
+        {
+              total_sgst6 > 0 ?
+        <Text style={{
+
+          padding: scale(10),
+          width: scale(100),
+          fontWeight: 'bold',
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >SGST (6%)</Text>:null}
+
 
         {/* 18 % */}
 
-        <Text style={{
 
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >IGST (18%)</Text>
-        <Text style={{
+        {
+          total_igst18 > 0 ?
+            <Text style={{
 
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >CGST (9%)</Text>
-        <Text style={{
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >IGST (18%)</Text> : null}
+        {
+          total_cgst9 > 0 ?
+            <Text style={{
 
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >SGST (9%)</Text>
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >CGST (9%)</Text> : null}
+        {
+          total_sgst9 > 0 ?
+            <Text style={{
+
+              padding: scale(10),
+              width: scale(100),
+              fontWeight: 'bold',
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >SGST (9%)</Text> : null}
+
 
         {/* 28 % */}
+
+        {
+          total_igst28 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1203,7 +1792,9 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >IGST (28%)</Text>
+        >IGST (28%)</Text>:null}
+        {
+          total_cgst14 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1216,7 +1807,9 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >CGST (14%)</Text>
+        >CGST (14%)</Text>:null}
+        {
+          total_sgst14 > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1229,9 +1822,10 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >SGST (14%)</Text>
+        >SGST (14%)</Text>:null}
         
-
+{
+              total_val > 0 ?
         <Text style={{
 
           padding: scale(10),
@@ -1241,7 +1835,7 @@ borderRadius: scale(4),
 
         }}
           numberOfLines={2}
-        >Total Invoice Amount</Text>
+        >Total Invoice Amount</Text>:null}
 
        
 
@@ -1250,7 +1844,33 @@ borderRadius: scale(4),
     )
   }
   _renderListItem(rowData, index) {
-    //console.log(rowData)
+    const { totaltax_val,
+      totaltax0,
+      totaltax2,
+      totaltax5,
+      totaltax12,
+      totaltax18,
+      totaltax28,
+      total_igst0,
+      total_igst2,
+      total_igst5,
+      total_igst12,
+      total_igst18,
+      total_igst28,
+      total_cgst0,
+      total_cgst1,
+      total_cgst2_5,
+      total_cgst6,
+      total_cgst9,
+      total_cgst14,
+      total_sgst0,
+      total_sgst1,
+      total_sgst2_5,
+      total_sgst6,
+      total_sgst9,
+      total_sgst14,
+      total_val
+    } = this.state
     return (
 
       <View style={{
@@ -1305,6 +1925,55 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >{rowData.item.Gst_number}</Text>
+      
+      {totaltax_val>0?
+          <Text style={{
+            padding: scale(10),
+            width: scale(100),
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+            borderColor: '#ddd',
+            borderRightWidth: scale(1)
+          }}
+            numberOfLines={2}
+          >{rowData.item.taxable_val}</Text>
+      :null}
+      
+
+        {totaltax0>0?
+          <Text style={{
+            padding: scale(10),
+            width: scale(100),
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+            borderColor: '#ddd',
+            borderRightWidth: scale(1)
+          }}
+            numberOfLines={2}
+          >{rowData.item.taxable_val0}</Text>
+        :null
+      }
+
+        {
+          totaltax2>0?
+            <Text style={{
+              padding: scale(10),
+              width: scale(100),
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >{rowData.item.taxable_val2}</Text>
+          
+          :null
+        }
+        {
+          totaltax5 > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1315,7 +1984,10 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >{rowData.item.totaltax_val}</Text>
+        >{rowData.item.taxable_val5}</Text>:null}
+
+        {
+          totaltax12 > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1326,7 +1998,10 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >{rowData.item.totaltax_val0}</Text>
+            >{rowData.item.taxable_val12}</Text>:null}
+
+        {
+          totaltax18 > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1337,7 +2012,10 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >{rowData.item.totaltax_val2}</Text>
+            >{rowData.item.taxable_val18}</Text>:null}
+
+        {
+          totaltax28 > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1348,43 +2026,27 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >{rowData.item.totaltax_val5}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.totaltax_val12}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.totaltax_val18}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.totaltax_val28}</Text>
+            >{rowData.item.taxable_val28}</Text>:null}
 
         {/* 0% */}
+        
+        {total_igst0>0?
+          <Text style={{
+            padding: scale(10),
+            width: scale(100),
+            fontSize: scale(12),
+            textAlign: 'center',
+            textAlignVertical: 'center',
+            borderColor: '#ddd',
+            borderRightWidth: scale(1)
+          }}
+            numberOfLines={2}
+          >{rowData.item.igst0}</Text>
+        :null}
 
+        {
+          total_cgst0 > 0 ?
+        
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1395,7 +2057,10 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >{rowData.item.igst0}</Text>
+        >{rowData.item.cgst0}</Text>:null}
+
+        {
+          total_sgst0 > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1406,21 +2071,38 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >{rowData.item.cgst0}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.sgst0}</Text>
+        >{rowData.item.sgst0}</Text>:null}
 
         {/* 2% */}
+        {
+          total_igst2 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.igst2}</Text>:null}
+        {
+          total_cgst1 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.cgst1}</Text>:null}
 
+        {
+          total_sgst1 > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1431,68 +2113,108 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >{rowData.item.igst2}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.cgst1}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.sgst1}</Text>
+        >{rowData.item.sgst1}</Text>:null}
 
         {/* 5% */}
+     {
+              total_igst5 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.igst5}</Text>:null}
+        {
+          total_cgst2_5 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.cgst2_5}</Text>:null}
+        {
+          total_sgst2_5 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.sgst2_5}</Text>:null}
 
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.igst5}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.cgst2_5}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.sgst2_5}</Text>
+        {/* 12% */}
+        {
+          total_igst12 > 0 ?
+            <Text style={{
+              padding: scale(10),
+              width: scale(100),
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >{rowData.item.igst12}</Text> : null}
+        {
+          total_cgst6 > 0 ?
+            <Text style={{
+              padding: scale(10),
+              width: scale(100),
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >{rowData.item.cgst6}</Text> : null}
+
+        {
+          total_sgst6 > 0 ?
+            <Text style={{
+              padding: scale(10),
+              width: scale(100),
+              fontSize: scale(12),
+              textAlign: 'center',
+              textAlignVertical: 'center',
+              borderColor: '#ddd',
+              borderRightWidth: scale(1)
+            }}
+              numberOfLines={2}
+            >{rowData.item.sgst6}</Text> : null}
 
         {/* 18% */}
+   {
+          total_igst18 > 0 ?
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.igst18}</Text>:null}
 
+        {
+          total_cgst9 > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1503,7 +2225,9 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >{rowData.item.igst18}</Text>
+        >{rowData.item.cgst9}</Text>:null}
+        {
+          total_sgst9 > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1514,21 +2238,11 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >{rowData.item.cgst9}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.sgst9}</Text>
+        >{rowData.item.sgst9}</Text>:null}
 
         {/* 28% */}
-
+        {
+          total_igst28 > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1540,6 +2254,9 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >{rowData.item.igst28}</Text>
+      :null}
+      {
+          total_cgst14 > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1551,6 +2268,9 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >{rowData.item.cgst14}</Text>
+       :null}
+       {
+          total_sgst14 > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1562,9 +2282,9 @@ borderRadius: scale(4),
         }}
           numberOfLines={2}
         >{rowData.item.sgst14}</Text>
-
-        {/* 0% */}
-
+      :null}
+        {
+          total_val > 0 ?
         <Text style={{
           padding: scale(10),
           width: scale(100),
@@ -1575,47 +2295,9 @@ borderRadius: scale(4),
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >{rowData.item.igst0}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.cgst0}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.sgst0}</Text>
+        >{rowData.item.total_amt}</Text>:null}
 
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.total_amt}</Text>
-
-       
-
-
-
-
+      
       </View>
 
 
@@ -1754,54 +2436,15 @@ borderRadius: scale(4),
                       numberOfLines={1}
                       onPress={() => { this._checkbox_fun(1) }}
 
-                    >Invoice Date</Text>
+                    >Invoice Period</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity>
-                    <Text
-                      style={{
-                        padding: scale(5),
-                        borderColor: '#000',
-                        borderWidth: scale(1),
-
-                        textAlign: 'center',
-
-                        fontSize: scale(10),
-                        backgroundColor: ch_invoice_no ? Color.headerTintColor : '#ccc',
-                        color: ch_invoice_no ? '#fff' : '#000',
-                        maxWidth: scale(100),
-                        borderRadius: scale(5),
-                        marginLeft: scale(5)
-
-                      }}
-                      numberOfLines={1}
-                      onPress={() => { this._checkbox_fun(2) }}
-                    >Invoice Number</Text>
-                  </TouchableOpacity>
+                  
 
 
                 </View>
 
-                <TouchableOpacity>
-                  <Text
-                    style={{
-                      padding: scale(5),
-                      borderColor: '#000',
-                      borderWidth: scale(1),
-
-                      textAlign: 'center',
-
-                      fontSize: scale(10),
-                      backgroundColor: ch_display_name ? Color.headerTintColor : '#ccc',
-                      color: ch_display_name ? '#fff' : '#000',
-                      width: scale(150),
-                      borderRadius: scale(5)
-
-                    }}
-                    numberOfLines={1}
-                    onPress={() => { this._checkbox_fun(3) }}
-                  >Customer Name</Text>
-                </TouchableOpacity>
+                
 
                 <View style={{
                   flexDirection: 'row',
@@ -1911,10 +2554,8 @@ borderRadius: scale(4),
                   numberOfLines={1}
                 >Report For:
               {filter_type == 0 ? "All Records" :
-                    filter_type == 1 ? "Date between " + this.state.start_date + " and " + this.state.end_date :
-                      filter_type == 2 ? "Invoice number " + invoice_number :
-                        filter_type == 3 ? "Customer name " + display_name :
-                          ""
+                    filter_type == 1 ? "Date between " +
+                     this.state.start_date + " and " + this.state.end_date :""
                   }
                 </Text>
 
@@ -2000,43 +2641,7 @@ borderRadius: scale(4),
 
           {
             this.state.show_list.length > 0 ?
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: 'space-between',
-                  width: scale(250),
-                  alignSelf: "center"
-
-                }}
-              >
-                <TouchableOpacity
-                  onPress={() => {
-
-                    if (this.state.show_list.length > 0) {
-                      this.printHTML()
-                    } else {
-                      alert("No Record Found")
-                    }
-                  }}
-                  style={{
-                    width: scale(100),
-                    height: scale(40),
-                    borderRadius: scale(10),
-                    backgroundColor: Color.headerTintColor,
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                  }}
-                >
-                  <Text style={{
-                    fontSize: scale(15),
-                    color: 'white',
-                    fontWeight: 'bold',
-                    width: scale(100),
-                    textAlign: 'center'
-                  }}
-                    numberOfLines={1}
-                  >Print</Text>
-                </TouchableOpacity>
+          
 
                 <TouchableOpacity
                   onPress={() => {
@@ -2055,7 +2660,8 @@ borderRadius: scale(4),
                     borderRadius: scale(10),
                     backgroundColor: Color.bgColor,
                     justifyContent: 'center',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    marginLeft:scale(20)
                   }}
                 >
                   <Text style={{
@@ -2070,7 +2676,7 @@ borderRadius: scale(4),
                 </TouchableOpacity>
 
 
-              </View> : null
+              : null
           }
 
 
