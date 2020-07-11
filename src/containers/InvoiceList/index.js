@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 
 import {
-  View,
+  View,Keyboard,
 
   Text, Modal, ScrollView, TextInput,ImageBackground,Dimensions,
   StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl, Image, ActivityIndicator, TouchableHighlight
@@ -44,7 +44,8 @@ class InvoiceListScreen extends PureComponent {
       ch_display_name: false,
       start_date: moment(new Date()).format('DD/MM/YYYY'),
       end_date: moment(new Date()).format('DD/MM/YYYY'),
-      filter_type:1
+      filter_type:1,
+      focus:false
     }
 
   }
@@ -74,7 +75,8 @@ class InvoiceListScreen extends PureComponent {
         ch_display_name: false,
         start_date: moment(new Date()).format('DD/MM/YYYY'),
         end_date: moment(new Date()).format('DD/MM/YYYY'),
-        filter_type: 1
+        filter_type: 1,
+        focus: false
        }, () => {
 
 
@@ -113,6 +115,7 @@ class InvoiceListScreen extends PureComponent {
         invoice_number: '',
         start_date: moment(new Date()).format('DD/MM/YYYY'),
         end_date: moment(new Date()).format('DD/MM/YYYY'),
+        focus: false,
       })
     } else if (val == "1") {
       this.setState({
@@ -122,6 +125,7 @@ class InvoiceListScreen extends PureComponent {
         ch_display_name: false,
         display_name: '',
         invoice_number: '',
+        focus: false,
 
       })
     }
@@ -135,6 +139,7 @@ class InvoiceListScreen extends PureComponent {
 
         start_date: moment(new Date()).format('DD/MM/YYYY'),
         end_date: moment(new Date()).format('DD/MM/YYYY'),
+        focus: false,
       })
     }
     else if (val == "3") {
@@ -147,6 +152,7 @@ class InvoiceListScreen extends PureComponent {
         invoice_number: '',
         start_date: moment(new Date()).format('DD/MM/YYYY'),
         end_date: moment(new Date()).format('DD/MM/YYYY'),
+        focus: false,
       })
     }
   }
@@ -155,6 +161,7 @@ class InvoiceListScreen extends PureComponent {
 
   //refresh
   onRefresh() {
+    Keyboard.dismiss()
     const { network } = this.props
     if (!network.isConnected) {
       Snackbar.show({
@@ -591,7 +598,7 @@ class InvoiceListScreen extends PureComponent {
 
 
   render() {
-    const { ch_display_name, ch_invoice, ch_invoice_no, ch_all, invoice_number, display_name,filter_type } = this.state;
+    const { focus,ch_display_name, ch_invoice, ch_invoice_no, ch_all, invoice_number, display_name,filter_type } = this.state;
 
 
 
@@ -806,7 +813,15 @@ class InvoiceListScreen extends PureComponent {
 
                 {
                   ch_invoice_no ?
-                    <View style={styles.userInput}>
+                      <View style={[styles.userInput,
+                      {
+                        borderColor:
+                          focus ?
+                            Color.headerTintColor
+                            :
+                            '#000',
+                      }
+                      ]}>
                       <TextInput
                         placeholder='Number'
                         style={styles.input}
@@ -815,12 +830,36 @@ class InvoiceListScreen extends PureComponent {
                         underlineColorAndroid="transparent"
                         onChangeText={invoice_number => this.setState({ invoice_number })}
                         value={invoice_number}
+                          returnKeyLabel={'search'}
+                          returnKeyType={'search'}
+                          onSubmitEditing={() => {
+
+                            this.onRefresh()
+
+                          }}
+
+
+                          onBlur={() => {
+                            this.setState({ focus: false })
+                          }}
+
+                          onFocus={() => {
+                            this.setState({ focus: true })
+                          }}
                       />
                     </View> : null
                 }
 
                 {ch_display_name ?
-                  <View style={styles.userInput}>
+                    <View style={[styles.userInput,
+                    {
+                      borderColor:
+                        focus ?
+                          Color.headerTintColor
+                          :
+                          '#000',
+                    }
+                    ]}>
                     <TextInput
                       placeholder='Name'
                       style={styles.input}
@@ -829,6 +868,22 @@ class InvoiceListScreen extends PureComponent {
                       underlineColorAndroid="transparent"
                       onChangeText={display_name => this.setState({ display_name })}
                       value={display_name}
+                        returnKeyLabel={'search'}
+                        returnKeyType={'search'}
+                        onSubmitEditing={() => {
+
+                          this.onRefresh()
+
+                        }}
+
+
+                        onBlur={() => {
+                          this.setState({ focus: false })
+                        }}
+
+                        onFocus={() => {
+                          this.setState({ focus: true })
+                        }}
                     />
                   </View> : null
                 }

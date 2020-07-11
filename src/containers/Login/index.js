@@ -350,7 +350,7 @@ return (
             }}
 
             onChangeText={username => this.setState({ username })}
-              returnKeyLabel={'next'}
+          returnKeyLabel={'next'}
           returnKeyType={'next'}
           onSubmitEditing={() => {
            

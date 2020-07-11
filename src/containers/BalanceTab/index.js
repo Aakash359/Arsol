@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 
 import {Dimensions,ImageBackground,
-    View, PermissionsAndroid, TouchableHighlight, TouchableWithoutFeedback, Animated,
+  View, PermissionsAndroid, Keyboard, TouchableWithoutFeedback, Animated,
 
     Text, Modal, ScrollView, TextInput,
     StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl, Image, ActivityIndicator
@@ -51,22 +51,15 @@ class BalanceTabScreen extends PureComponent {
             onEndReachedCalledDuringMomentum: true,
             page: 0,
             show_list: [],
-
-            filter: false,
             display_name: '',
-            invoice_number: '',
-
             ch_all: true,
             ch_invoice: false,
             ch_customer_name: false,
-            ch_ason: false,
-
             start_date: moment(new Date()).format('DD/MM/YYYY'),
             end_date: moment(new Date()).format('DD/MM/YYYY'),
-            ason_date: moment(new Date()).format('DD/MM/YYYY'),
-
-            customer_type: 'balance',
-            activeSections: [],
+            
+            focus:false
+            
 
         }
     }
@@ -88,335 +81,52 @@ class BalanceTabScreen extends PureComponent {
     }
 
     _checkbox_fun(val) {
-        if (val.label == "All") {
+        if (val == 0) {
             this.setState({
                 ch_all: true,
                 ch_invoice: false,
                 ch_customer_name: false,
-                ch_ason: false,
                 display_name: '',
-                invoice_number: '',
                 start_date: moment(new Date()).format('DD/MM/YYYY'),
                 end_date: moment(new Date()).format('DD/MM/YYYY'),
-                ason_date: moment(new Date()).format('DD/MM/YYYY'),
+              focus: false
+               
 
             })
-        } else if (val.label == "Invoice Date") {
+        } else if (val == 1) {
             this.setState({
                 ch_all: false,
                 ch_invoice: true,
                 ch_customer_name: false,
-                ch_ason: false,
                 display_name: '',
-                invoice_number: '',
                 start_date: moment(new Date()).format('DD/MM/YYYY'),
                 end_date: moment(new Date()).format('DD/MM/YYYY'),
-                ason_date: moment(new Date()).format('DD/MM/YYYY'),
+              focus: false
+               
             })
         }
 
-        else if (val.label == "Customer Name") {
+        else if (val == 2) {
             this.setState({
                 ch_all: false,
                 ch_invoice: false,
                 ch_customer_name: true,
-                ch_ason: false,
                 display_name: '',
-                invoice_number: '',
                 start_date: moment(new Date()).format('DD/MM/YYYY'),
                 end_date: moment(new Date()).format('DD/MM/YYYY'),
-                ason_date: moment(new Date()).format('DD/MM/YYYY'),
+              focus: false
+          
             })
         }
 
-        else if (val.label == "As on") {
-            this.setState({
-                ch_all: false,
-                ch_invoice: false,
-                ch_customer_name: false,
-                ch_ason: true,
-                display_name: '',
-                invoice_number: '',
-                start_date: moment(new Date()).format('DD/MM/YYYY'),
-                end_date: moment(new Date()).format('DD/MM/YYYY'),
-                ason_date: moment(new Date()).format('DD/MM/YYYY'),
-            })
-        }
+      
     }
 
-    _filterRender() {
-        const { ch_customer_name,
-            ch_invoice,
-            ch_all,
-            customer_type,
-            ch_ason,
-            display_name,
-            ason_date,
-            start_date,
-            end_date,
-        } = this.state;
-
-
-        return (
-            <Modal
-                transparent={true}
-                animationType={'slide'}
-                visible={this.state.filter}
-                onRequestClose={() => {
-                    this.setState({ filter: false });
-                }}>
-                <View style={{ flex: 1 }}>
-
-
-
-                    <ScrollView style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-                        contentContainerStyle={{
-                            flexGrow: 1,
-                            justifyContent: 'center',
-                            alignItems: "center",
-                            padding: scale(5)
-                        }}
-                    >
-
-
-                        <View>
-
-
-                            <View style={{
-                                backgroundColor: 'white',
-                                borderRadius: scale(5),
-                                width: scale(250),
-
-                            }}>
-                                <View style={{
-                                    height: scale(40),
-                                    justifyContent: 'center', alignItems: 'center'
-                                }}>
-                                    <Text style={{ fontSize: scale(15), color: "#00B5FF", fontWeight: '500' }}
-                                        numberOfLines={1}
-                                    >Filter customer {customer_type}</Text>
-                                </View>
-
-                                <View style={{ height: scale(2), backgroundColor: "#00B5FF", }} />
-
-                                <View style={{ padding: scale(5) }}>
-
-
-
-
-
-                                    <Checkbox
-                                        label='All'
-                                        checked={ch_all}
-                                        onChange={(checked) => this._checkbox_fun(checked)}
-                                        labelStyle={{ fontSize: scale(15), }}
-                                        checkboxStyle={{ width: scale(30), height: scale(30) }}
-
-                                    />
-
-                                    {
-                                        customer_type == "balance" ?
-                                            <View>
-                                                <Checkbox
-                                                    label='Invoice Date'
-                                                    checked={ch_invoice}
-                                                    onChange={(checked) => this._checkbox_fun(checked)}
-                                                    labelStyle={{ fontSize: scale(15), }}
-                                                    checkboxStyle={{ width: scale(30), height: scale(30) }}
-
-                                                />
-                                                {
-                                                    ch_invoice ?
-                                                        <View>
-                                                            <DatePicker
-                                                                style={{ width: scale(200), marginTop: scale(10) }}
-                                                                date={start_date}
-                                                                placeholder="Select Start Date"
-                                                                mode={'date'}
-                                                                format="DD/MM/YYYY"
-                                                                confirmBtnText="Confirm"
-                                                                cancelBtnText="Cancel"
-                                                                showIcon={false}
-                                                                customStyles={{
-                                                                    dateIcon: {
-                                                                        position: 'absolute',
-                                                                        left: scale(0),
-                                                                        top: scale(4),
-                                                                        marginLeft: scale(0)
-                                                                    },
-                                                                    dateInput: {
-                                                                        marginLeft: scale(36),
-
-                                                                    },
-                                                                    placeholderText: {
-                                                                        color: '#565656'
-                                                                    }
-                                                                }}
-                                                                minuteInterval={10}
-                                                                onDateChange={(date) => { this.setState({ start_date: date }) }}
-
-                                                            />
-                                                            <DatePicker
-                                                                style={{ width: scale(200), marginTop: scale(10) }}
-                                                                date={end_date}
-                                                                placeholder="Select End Date"
-                                                                mode={'date'}
-                                                                format="DD/MM/YYYY"
-                                                                confirmBtnText="Confirm"
-                                                                cancelBtnText="Cancel"
-                                                                showIcon={false}
-                                                                customStyles={{
-                                                                    dateIcon: {
-                                                                        position: 'absolute',
-                                                                        left: scale(0),
-                                                                        top: scale(4),
-                                                                        marginLeft: scale(0)
-                                                                    },
-                                                                    dateInput: {
-                                                                        marginLeft: scale(36),
-
-                                                                    },
-                                                                    placeholderText: {
-                                                                        color: '#565656'
-                                                                    }
-                                                                }}
-                                                                minuteInterval={10}
-                                                                onDateChange={(date) => { this.setState({ end_date: date }) }}
-
-                                                            />
-                                                        </View>
-                                                        : null
-                                                }
-                                            </View>
-                                            : null
-
-                                    }
-
-
-
-
-
-
-                                    <Checkbox
-                                        label='Customer Name'
-                                        checked={ch_customer_name}
-                                        onChange={(checked) => this._checkbox_fun(checked)}
-                                        labelStyle={{ fontSize: scale(15), }}
-                                        checkboxStyle={{ width: scale(30), height: scale(30) }}
-
-                                    />
-                                    {ch_customer_name ?
-                                        <View style={styles.userInput}>
-                                            <TextInput
-                                                placeholder='Name'
-                                                style={styles.input}
-                                                autoCorrect={false}
-                                                autoCapitalize={'none'}
-                                                underlineColorAndroid="transparent"
-                                                onChangeText={display_name => this.setState({ display_name })}
-                                                value={display_name}
-                                            />
-                                        </View> : null
-                                    }
-
-                                    {customer_type != "balance" ?
-                                        <View>
-                                            <Checkbox
-                                                label='As on'
-                                                checked={ch_ason}
-                                                onChange={(checked) => this._checkbox_fun(checked)}
-                                                labelStyle={{ fontSize: scale(15), }}
-                                                checkboxStyle={{ width: scale(30), height: scale(30) }}
-
-                                            />
-
-                                            {
-                                                ch_ason ?
-                                                    <View>
-                                                        <DatePicker
-                                                            style={{ width: scale(200), marginTop: scale(10) }}
-                                                            date={ason_date}
-                                                            placeholder="Select End Date"
-                                                            mode={'date'}
-                                                            format="DD/MM/YYYY"
-                                                            confirmBtnText="Confirm"
-                                                            cancelBtnText="Cancel"
-                                                            showIcon={false}
-                                                            customStyles={{
-                                                                dateIcon: {
-                                                                    position: 'absolute',
-                                                                    left: scale(0),
-                                                                    top: scale(4),
-                                                                    marginLeft: scale(0)
-                                                                },
-                                                                dateInput: {
-                                                                    marginLeft: scale(36),
-
-                                                                },
-                                                                placeholderText: {
-                                                                    color: '#565656'
-                                                                }
-                                                            }}
-                                                            minuteInterval={10}
-                                                            onDateChange={(date) => { this.setState({ ason_date: date }) }}
-
-                                                        />
-
-                                                    </View>
-                                                    : null
-                                            }
-                                        </View> : null
-
-                                    }
-
-
-
-                                </View>
-
-
-
-
-
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        this.setState({ filter: false }, () => {
-                                            this.onRefresh()
-                                        })
-                                    }}
-                                >
-                                    <View style={{
-                                        backgroundColor: "#00B5FF", height: scale(40), alignItems: "center",
-                                        justifyContent: 'center',
-                                        borderRadius: scale(4),
-
-                                    }}>
-                                        <Text style={{ fontSize: scale(18), color: "#fff", fontWeight: 'bold' }}
-                                            numberOfLines={1}
-                                        >Apply</Text>
-                                    </View>
-                                </TouchableOpacity>
-
-
-
-
-
-
-
-
-                            </View>
-
-
-
-                        </View>
-                    </ScrollView>
-                </View>
-
-            </Modal>
-        )
-    }
+   
 
     //refresh
     onRefresh() {
+      Keyboard.dismiss();
         const { network } = this.props
         if (!network.isConnected) {
             Snackbar.show({
@@ -442,15 +152,13 @@ class BalanceTabScreen extends PureComponent {
 
     filter_fun() {
 
-        const { ch_all, ch_invoice, ch_customer_name, ch_ason } = this.state
+        const { ch_all, ch_invoice, ch_customer_name} = this.state
         if (ch_all) {
             return 0
         } else if (ch_invoice) {
             return 1
         } else if (ch_customer_name) {
             return 2
-        } else if (ch_ason) {
-            return 3
         } else {
             return 0
         }
@@ -458,18 +166,20 @@ class BalanceTabScreen extends PureComponent {
 
     hit_arreportsApi() {
         const { user_id, user_type } = this.props
-        const { page, start_date, end_date, display_name, ason_date, customer_type } = this.state
+        const { page, start_date, end_date, display_name } = this.state
         var filter_type = this.filter_fun()
+      this.setState({ filter_type: filter_type })
 
 
-        ArsolApi.ARReports_api(user_id,
+        ArsolApi.ARReports_api(
+            user_id,
             user_type,
-            customer_type,
+            'balance',
             filter_type,
             start_date,
             end_date,
             display_name,
-            ason_date,
+            '',
             page
         )
 
@@ -602,105 +312,6 @@ class BalanceTabScreen extends PureComponent {
         }
     };
 
-
-
-
-
-    //footer
-    renderFooter = () => {
-        if (!this.state.load_more) return <View style={{ marginBottom: scale(100), }}></View>;
-        return (
-            <View style={{ marginBottom: scale(100), }}>
-                <ActivityIndicator size="large" color="#ddd" />
-            </View>
-        );
-    };
-
-
-    setMenuRef = ref => {
-        this._menu = ref;
-    };
-
-    hideMenu = () => {
-        this._menu.hide();
-    };
-
-    showMenu = () => {
-        this._menu.show();
-    };
-
-    ItemPress(item) {
-        this._menu.hide();
-        this.setState({
-            customer_type: item,
-            display_name: '',
-            invoice_number: '',
-            ch_all: true,
-            ch_invoice: false,
-            ch_customer_name: false,
-            ch_ason: false,
-            start_date: moment(new Date()).format('DD/MM/YYYY'),
-            end_date: moment(new Date()).format('DD/MM/YYYY'),
-            ason_date: moment(new Date()).format('DD/MM/YYYY'),
-        }, () => {
-            this.onRefresh()
-        })
-
-    }
-
-    // 
-    renderNext() {
-        const { show_list, customer_type } = this.state
-
-
-        var footer_View = (
-            <View style={{ backgroundColor: 'transparent' }}>
-                <View
-                    style={{
-                        width: '94%',
-                        alignSelf: 'center',
-
-                        borderTopWidth: 0.8,
-                        borderLeftWidth: 0.8,
-                        borderRightWidth: 0.8,
-                        borderTopLeftRadius: scale(7),
-                        borderTopRightRadius: scale(7),
-                        borderColor: 'grey',
-                        padding: scale(3),
-
-
-                    }}>
-                    <Text style={{ fontSize: scale(12), color: '#000', fontWeight: '700' }}>  Total custmer {customer_type}</Text>
-                    {customer_type == 'balance' ?
-                        <View style={{ marginLeft: scale(20) }}>
-                            <Text style={{ fontSize: scale(12), color: '#000' }}>Total Amount:{show_list.reduce((prev, next) => prev + parseInt(next.total_amt), 0)} </Text>
-                            <Text style={{ fontSize: scale(12), color: '#000' }}>Amount Received:{show_list.reduce((prev, next) => prev + parseInt(next.amt_receive), 0)} </Text>
-                            <Text style={{ fontSize: scale(12), color: '#000' }}>Balance:{show_list.reduce((prev, next) => prev + parseInt(next.balance), 0)} </Text>
-                        </View> :
-                        customer_type == 'summary' ?
-                            <View style={{ marginLeft: scale(20) }}>
-                                <Text style={{ fontSize: scale(12), color: '#000' }}>Balance:{show_list.reduce((prev, next) => prev + parseInt(next.balance), 0)} </Text>
-                            </View> :
-                            customer_type == "aging" ?
-                                <View style={{ marginLeft: scale(20) }}>
-                                    <Text style={{ fontSize: scale(12), color: '#000' }}>0-30:{show_list.reduce((prev, next) => prev + parseInt(next.day0_30), 0)} </Text>
-                                    <Text style={{ fontSize: scale(12), color: '#000' }}>31-60:{show_list.reduce((prev, next) => prev + parseInt(next.day31_60), 0)} </Text>
-                                    <Text style={{ fontSize: scale(12), color: '#000' }}>61-90:{show_list.reduce((prev, next) => prev + parseInt(next.day61_90), 0)} </Text>
-                                    <Text style={{ fontSize: scale(12), color: '#000' }}>91-120:{show_list.reduce((prev, next) => prev + parseInt(next.day91_120), 0)} </Text>
-                                    <Text style={{ fontSize: scale(12), color: '#000' }}>121-above:{show_list.reduce((prev, next) => prev + parseInt(next.day121_above), 0)} </Text>
-                                </View> : null
-                    }
-
-
-
-
-
-                </View>
-            </View>
-        );
-        return footer_View;
-    }
-
     //file export
     //permission
     requestRunTimePermission = () => {
@@ -734,13 +345,13 @@ class BalanceTabScreen extends PureComponent {
 
     //excel file
     exportFile() {
-        const { show_list, customer_type } = this.state;
+        const { show_list } = this.state;
 
         var file_arr = []
         var wscols = [];
         for (var i = 0; i < show_list.length; i++) {
 
-            if (customer_type == 'balance') {
+           
                 file_arr.push({
                     "Invoice Number": show_list[i].in_no,
                     "Customer Name": show_list[i].in_dis_name,
@@ -750,25 +361,7 @@ class BalanceTabScreen extends PureComponent {
                     "Receipt date": show_list[i].rec_date,
                     "Balance": show_list[i].balance,
                 })
-            } else if (customer_type == 'summary') {
-                file_arr.push({
-
-                    "Customer Name": show_list[i].cust_name,
-                    "Balance": show_list[i].balance,
-
-                })
-            } else if (customer_type == 'aging') {
-                file_arr.push({
-
-                    "Customer Name": show_list[i].cust_name,
-                    "0-30": show_list[i].day0_30,
-                    "31-60": show_list[i].day31_60,
-                    "61-90": show_list[i].day61_90,
-                    "91-120": show_list[i].day91_120,
-                    "121-above": show_list[i].day121_above,
-
-                })
-            }
+            
 
 
 
@@ -799,7 +392,7 @@ class BalanceTabScreen extends PureComponent {
         // console.log("wbout",output(wbout))
         var date = new Date();
 
-        const file = DDP + "customer_" + customer_type + Math.floor(date.getTime()
+        const file = DDP + "customer_balance"+ Math.floor(date.getTime()
             + date.getSeconds() / 2) + ".xlsx";
 
 
@@ -825,200 +418,10 @@ class BalanceTabScreen extends PureComponent {
 
     
 
-  _renderListItem(rowData, index) {
-    //console.log(rowData)
-    return (
-
-      <View style={{
-        flexDirection: 'row',
-        borderWidth: scale(0.5),
-        borderColor: '#ccc'
-
-      }}
-        key={rowData.index}
-      >
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_date}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_no}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_dis_name}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_gst}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_taxable}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_igst}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_cgst}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.in_sgst}</Text>
-        <Text style={{
-          padding: scale(10),
-          width: scale(100),
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >{rowData.item.total_amount}</Text>
-        
-        <View
-          style={{
-            padding: scale(10),
-            width: scale(100),
-            alignItems: "center",
-            justifyContent: "center",
-            borderColor: '#ddd',
-            borderRightWidth: scale(1)
-          }}
-        >
-
-          <TouchableOpacity
-            style={{
-              backgroundColor: Color.btn,
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: scale(5),
-              height: scale(30),
-              width: scale(40),
-
-
-            }}
-            onPress={() => { this.props.navigation.navigate('InvoiceReportDetail') }}
-         >
-            <Text style={{ color: "#fff", fontSize: scale(10) }}>View</Text>
-          </TouchableOpacity>
-
-        </View>
-
-        <View
-          style={{
-            padding: scale(10),
-            width: scale(100),
-            alignItems: "center",
-            justifyContent: "center"
-          }}
-        >
-
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#0095DF",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: scale(5),
-              height: scale(30),
-              width: scale(60),
-
-
-            }}
-            onPress={() => {
-              this.props.navigation.navigate('InvoiceOne', {
-                EditId: rowData.item.in_id
-              })
-            }}
-          >
-            <Text style={{ color: "#fff", fontSize: scale(10) }}>Re-print</Text>
-          </TouchableOpacity>
-
-        </View>
-
-
-
-
-      </View>
-
-
-
-
-
-
-    )
-  }
-
-
-  
-
-
-
- 
 
   //footer
   renderFooter = () => {
+    const {show_list} =this.state
     if (!this.state.load_more) return (
 
       <View>
@@ -1051,11 +454,10 @@ class BalanceTabScreen extends PureComponent {
                 width: scale(100),
                 fontWeight: 'bold',
                 fontSize: scale(12),
-
+                textAlign: 'center',
                 textAlignVertical: 'center',
                 borderColor: '#ddd',
-                borderRightWidth: scale(1),
-                textAlign: 'right'
+                borderRightWidth: scale(1)
               }}
                 numberOfLines={2}
               >Total:</Text>
@@ -1084,7 +486,7 @@ class BalanceTabScreen extends PureComponent {
                 borderRightWidth: scale(1)
               }}
                 numberOfLines={2}
-              ></Text>
+              >{show_list.reduce((prev, next) => prev + parseInt(next.total_amt), 0)}</Text>
               <Text style={{
 
                 padding: scale(10),
@@ -1097,66 +499,7 @@ class BalanceTabScreen extends PureComponent {
                 borderRightWidth: scale(1)
               }}
                 numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_taxable), 0)}</Text>
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_igst), 0)}</Text>
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_cgst), 0)}</Text>
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.in_sgst), 0)}</Text>
-              <Text style={{
-
-                padding: scale(10),
-                width: scale(100),
-                fontWeight: 'bold',
-                fontSize: scale(12),
-                textAlign: 'center',
-                textAlignVertical: 'center',
-                borderColor: '#ddd',
-                borderRightWidth: scale(1)
-              }}
-                numberOfLines={2}
-              >{this.state.show_list.reduce((prev, next) =>
-                prev + parseInt(next.total_amount), 0)}</Text>
-             
-
+              >{show_list.reduce((prev, next) => prev + parseInt(next.amt_receive), 0)}</Text>
               <Text style={{
 
                 padding: scale(10),
@@ -1170,18 +513,19 @@ class BalanceTabScreen extends PureComponent {
               }}
                 numberOfLines={2}
               ></Text>
-
               <Text style={{
 
                 padding: scale(10),
                 width: scale(100),
                 fontWeight: 'bold',
                 fontSize: scale(12),
-
+                textAlign: 'center',
+                textAlignVertical: 'center',
+                borderColor: '#ddd',
+                borderRightWidth: scale(1)
               }}
                 numberOfLines={2}
-              ></Text>
-
+              >{show_list.reduce((prev, next) => prev + parseInt(next.balance), 0)}</Text>
 
             </View>
 
@@ -1227,21 +571,8 @@ class BalanceTabScreen extends PureComponent {
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >Invoice Date</Text>
-
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
         >Invoice Number</Text>
+
         <Text style={{
 
           padding: scale(10),
@@ -1267,7 +598,7 @@ class BalanceTabScreen extends PureComponent {
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >Customer GSTIN</Text>
+        >Invoice Date</Text>
         <Text style={{
 
           padding: scale(10),
@@ -1280,7 +611,7 @@ class BalanceTabScreen extends PureComponent {
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >Taxable Value</Text>
+        >Total Amount</Text>
         <Text style={{
 
           padding: scale(10),
@@ -1293,7 +624,7 @@ class BalanceTabScreen extends PureComponent {
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >IGST</Text>
+        >Amount Received</Text>
         <Text style={{
 
           padding: scale(10),
@@ -1306,7 +637,7 @@ class BalanceTabScreen extends PureComponent {
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >CGST</Text>
+        >Receipt Date</Text>
         <Text style={{
 
           padding: scale(10),
@@ -1319,53 +650,121 @@ class BalanceTabScreen extends PureComponent {
           borderRightWidth: scale(1)
         }}
           numberOfLines={2}
-        >SGST</Text>
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-          textAlign: 'center',
-          textAlignVertical: 'center',
-          borderColor: '#ddd',
-          borderRightWidth: scale(1)
-        }}
-          numberOfLines={2}
-        >Total Invoice Value (INR)</Text>
-       
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-
-        }}
-          numberOfLines={2}
-        ></Text>
-
-        <Text style={{
-
-          padding: scale(10),
-          width: scale(100),
-          fontWeight: 'bold',
-          fontSize: scale(12),
-
-        }}
-          numberOfLines={2}
-        ></Text>
+        >Balance</Text>
 
 
       </View>
     )
   }
 
+  _renderListItem(rowData, index) {
+    //console.log(rowData)
+    return (
+
+      <View style={{
+        flexDirection: 'row',
+        borderWidth: scale(0.5),
+        borderColor: '#ccc'
+
+      }}
+        key={rowData.index}
+      >
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.in_no}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.in_dis_name}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.in_date}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.total_amt}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.amt_receive}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.rec_date}</Text>
+        <Text style={{
+          padding: scale(10),
+          width: scale(100),
+          fontSize: scale(12),
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          borderColor: '#ddd',
+          borderRightWidth: scale(1)
+        }}
+          numberOfLines={2}
+        >{rowData.item.balance}</Text>
+       
+
+
+
+      </View>
+
+
+
+
+
+
+    )
+  }
+
 
 
   render() {
-    const { ch_display_name, ch_invoice, ch_invoice_no, ch_all,
-       invoice_number, display_name,filter_type } = this.state;
+    const { ch_customer_name, ch_invoice,ch_all,focus,
+        display_name,filter_type } = this.state;
 
 
 
@@ -1473,7 +872,7 @@ class BalanceTabScreen extends PureComponent {
                   >Invoice Date</Text>
                 </TouchableOpacity>
 
-                  <TouchableOpacity>
+                <TouchableOpacity>
                     <Text
                       style={{
                         padding: scale(5),
@@ -1483,8 +882,8 @@ class BalanceTabScreen extends PureComponent {
                         textAlign: 'center',
 
                         fontSize: scale(10),
-                        backgroundColor: ch_display_name ? Color.headerTintColor : '#ccc',
-                        color: ch_display_name ? '#fff' : '#000',
+                        backgroundColor: ch_customer_name ? Color.headerTintColor : '#ccc',
+                        color: ch_customer_name ? '#fff' : '#000',
                         width: scale(100),
                         borderRadius: scale(5),
                         marginLeft:scale(5)
@@ -1543,8 +942,16 @@ class BalanceTabScreen extends PureComponent {
 
                
 
-                {ch_display_name ?
-                  <View style={styles.userInput}>
+                {ch_customer_name ?
+                    <View style={[styles.userInput,
+                    {
+                      borderColor:
+                        focus ?
+                          Color.headerTintColor
+                          :
+                          '#000',
+                    }
+                    ]}>
                     <TextInput
                       placeholder='Name'
                       style={styles.input}
@@ -1553,6 +960,23 @@ class BalanceTabScreen extends PureComponent {
                       underlineColorAndroid="transparent"
                       onChangeText={display_name => this.setState({ display_name })}
                       value={display_name}
+                        returnKeyLabel={'search'}
+                        returnKeyType={'search'}
+                        onSubmitEditing={() => {
+
+                          this.onRefresh()
+
+                        }}
+
+
+                        onBlur={() => {
+                          this.setState({ focus: false })
+                        }}
+
+                        onFocus={() => {
+                          this.setState({ focus: true })
+                        }}
+
                     />
                   </View> : null
                 }
@@ -1597,10 +1021,9 @@ class BalanceTabScreen extends PureComponent {
               >Report For:
               {filter_type==0 ? "All Records" :
                   filter_type==1 ? "Date between " + this.state.start_date + " and " + this.state.end_date :
-                    filter_type==2 ? "Invoice number " + invoice_number :
-                      filter_type==3 ? "Customer name " + display_name :
+                  filter_type==2 ? "Customer name " + display_name :
                         ""
-                }
+                        }
               </Text>
 
 
@@ -1683,86 +1106,47 @@ class BalanceTabScreen extends PureComponent {
 
         </View>
 
- {
-            this.state.show_list.length>0?
-            <View
-            style={{
-            flexDirection: "row",
-            justifyContent: 'space-between',
-            width: scale(250),
-            alignSelf: "center"
+{
+            this.state.show_list.length > 0 ?
+          
 
-          }}
-          >
-            <TouchableOpacity
-            onPress={() => {
+                <TouchableOpacity
+                  onPress={() => {
 
-              if (this.state.show_list.length > 0) {
-                this.printHTML()
-              } else {
-                alert("No Record Found")
-              }
-            }}
-            style={{
-              width: scale(100),
-              height: scale(40),
-              borderRadius: scale(10),
-              backgroundColor: Color.headerTintColor,
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
-          >
-            <Text style={{
-              fontSize: scale(15),
-              color: 'white',
-              fontWeight: 'bold',
-              width: scale(100),
-              textAlign: 'center'
-            }}
-              numberOfLines={1}
-            >Print</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-
-              if (this.state.show_list.length > 0) {
-                this.requestRunTimePermission()
-              } else {
-                alert("No Record Found")
-              }
+                    if (this.state.show_list.length > 0) {
+                      this.requestRunTimePermission()
+                    } else {
+                      alert("No Record Found")
+                    }
 
 
-            }}
-            style={{
-              width: scale(100),
-              height: scale(40),
-              borderRadius: scale(10),
-              backgroundColor: Color.bgColor,
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}
-          >
-            <Text style={{
-              fontSize: scale(15),
-              color: 'white',
-              fontWeight: 'bold',
-              width: scale(100),
-              textAlign: 'center'
-            }}
-              numberOfLines={1}
-            >Export</Text>
-          </TouchableOpacity>
+                  }}
+                  style={{
+                    width: scale(100),
+                    height: scale(40),
+                    borderRadius: scale(10),
+                    backgroundColor: Color.bgColor,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginLeft:scale(20)
+                  }}
+                >
+                  <Text style={{
+                    fontSize: scale(15),
+                    color: 'white',
+                    fontWeight: 'bold',
+                    width: scale(100),
+                    textAlign: 'center'
+                  }}
+                    numberOfLines={1}
+                  >Export</Text>
+                </TouchableOpacity>
 
 
-        </View>:null
- }
+              : null
+          }
 
       
-
-
-
-
 </ImageBackground>
       </View>
     );
