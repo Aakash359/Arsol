@@ -51,6 +51,11 @@ import _ChangePassword from './ChangePassword';
 import _ForgotPassword from './ForgotPassword';
 import _PayTM from './PayTM';
 
+import _BalanceTab from './BalanceTab';
+import _SummaryTab from './SummaryTab';
+import _AgingTab from './AgingTab';
+
+
 
 export const Loading = _Loading;
 export const Login = _Login;
@@ -101,6 +106,10 @@ export const EditCompany = _EditCompany;
 export const ChangePassword = _ChangePassword;
 export const ForgotPassword = _ForgotPassword;
 export const PayTM = _PayTM;
+
+export const BalanceTab = _BalanceTab;
+export const SummaryTab = _SummaryTab;
+export const AgingTab = _AgingTab;
 
 
 
