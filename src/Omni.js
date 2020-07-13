@@ -266,3 +266,7 @@ export let AddUser_post = ( body) =>
   //57
   export let Reprint_post = ( body) =>
    api.post('Customer/RePrintPdfInvoice', body).then(response => response);
+   //58
+export let SubscriptionPlanPayment_post = (body) =>
+  api.post('User/SubscriptionPlanPayment', body).then(response => response);
+

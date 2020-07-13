@@ -55,9 +55,45 @@ class UserRolesScreen extends PureComponent {
       backgroundColor: "red"
     });
   }else{
-    this.setState({loading:true},()=>{
+    this.setState({loading:true,
+      switch_status: false,
+      refresh: false,
+      show_list: [],
+
+      edit_id: "",
+      roles_data: [],
+      search_text: '',
+      btn_confirm: 'Confirm '
+    },()=>{
+        this.array_roles = []
       this.hit_userRoleApi()
-    })}
+    })
+  
+  }
+  }
+
+
+  componentDidUpdate(prevProps) {
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          this.setState({
+            loading: true,
+            switch_status: false,
+            refresh: false,
+            show_list: [],
+
+            edit_id: "",
+            roles_data: [],
+            search_text: '',
+            btn_confirm: 'Confirm '
+          }, () => {
+            this.array_roles = []
+            this.hit_userRoleApi()
+          })
+        }
+      }
+    }
   }
 
   hit_userRoleApi(){

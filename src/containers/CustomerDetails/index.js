@@ -58,6 +58,25 @@ class CustomerDetailsScreen extends PureComponent {
    
   }
 
+
+  componentDidUpdate(prevProps) {
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          this.setState({
+            loading: true,
+            refresh: false,
+            load_more: false,
+            onEndReachedCalledDuringMomentum: true,
+            show_list: []
+          }, () => {
+            this.hit_customerDetailApi()
+          })
+        }
+      }
+    }
+  }
+
   hit_customerDetailApi() {
     const { user_id, user_type } = this.props
     const { page } = this.state

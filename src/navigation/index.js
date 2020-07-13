@@ -125,6 +125,8 @@ function MainStackScreen() {
       <MainStack.Screen name = "ManageSubscription" component = {ManageSubscriptionScreen}/>
       <MainStack.Screen name = "ChangePassword" component = {ChangePasswordScreen}/>
       <MainStack.Screen name = "EditCompany" component = {EditCompanyScreen}/>
+
+      <MainStack.Screen name="PayTM" component={PayTMScreen} />
   
     </MainStack.Navigator>
   );

@@ -66,10 +66,35 @@ class UserDetailsScreen extends PureComponent {
       is_create:true
       },()=>{
       this.hit_userDetailApi()
-    })}
+    })
+  }
    })
   }
 
+
+  componentDidUpdate(prevProps) {
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          this.setState({
+            loading: true,
+            ed_id: "",
+            refresh: false,
+            addItem: false,
+            show_list: [],
+            fname: '',
+            lname: '',
+            u_type: 'Admin',
+            email_id: '',
+            password: '',
+            is_create: true
+          }, () => {
+            this.hit_userDetailApi()
+          })
+        }
+      }
+    }
+  }
 
 
   //add

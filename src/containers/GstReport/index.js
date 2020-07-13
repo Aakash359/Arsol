@@ -156,6 +156,66 @@ this._subscribe = this.props.navigation.addListener('focus', () => {
 
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          this.setState({
+            loading: true,
+            refresh: false,
+            load_more: false,
+            onEndReachedCalledDuringMomentum: true,
+            page: 0,
+            show_list: [],
+
+
+            ch_all: false,
+            ch_invoice: true,
+
+            start_date: moment(new Date()).format('DD/MM/YYYY'),
+            end_date: moment(new Date()).format('DD/MM/YYYY'),
+
+            totaltax_val: 0,
+            totaltax0: 0,
+            totaltax2: 0,
+            totaltax5: 0,
+            totaltax12: 0,
+            totaltax18: 0,
+            totaltax28: 0,
+            total_igst0: 0,
+            total_igst2: 0,
+            total_igst5: 0,
+            total_igst12: 0,
+            total_igst18: 0,
+            total_igst28: 0,
+            total_cgst0: 0,
+            total_cgst1: 0,
+            total_cgst2_5: 0,
+            total_cgst6: 0,
+            total_cgst9: 0,
+            total_cgst14: 0,
+            total_sgst0: 0,
+            total_sgst1: 0,
+            total_sgst2_5: 0,
+            total_sgst6: 0,
+            total_sgst9: 0,
+            total_sgst14: 0,
+            total_val: 0,
+
+            filter_type: 1
+
+          }, () => {
+
+
+
+            this.hit_gst_reportsApi()
+
+          })
+        }
+      }
+    }
+  }
+
   
 
  

@@ -56,7 +56,7 @@ import {
   ManageSubscription_post,
   AddUser_post,
   Reprint_post,
-
+  SubscriptionPlanPayment_post
 } from './../Omni';
 
 
@@ -977,6 +977,16 @@ const ArsolApi = {
 
     return await Reprint_post(body);
     
+  },
+
+  SubscriptionPlanPayment_api: async (user_id, user_type, plan_id) => {
+    let body = new FormData();
+    body.append('user_id', user_id);
+    body.append('user_type', user_type);
+    body.append('plan_id', plan_id);
+
+    return await SubscriptionPlanPayment_post(body);
+
   },
 
 };

@@ -83,7 +83,47 @@ class CustomerScreen extends PureComponent {
     } else {
 
       if (Cust_id != 'NO-ID') {
-        this.setState({ cust_id: Cust_id, loading: true }, () => {
+        this.setState({ cust_id: Cust_id, loading: true,
+          primary_contact: '',
+          fname: '',
+          lname: '',
+          company_name: '',
+          display_name: '',
+          contact_email: '',
+          gst_no: '',
+          phone: '',
+          mobile: '',
+          website: '',
+          currency: '',
+          pay_term: '',
+          lang: '',
+          fb: '',
+          twitter: '',
+          country: '',
+          address: '',
+          city: '',
+          state: '',
+          zipcode: '',
+          phone_add: '',
+          fax: '',
+          sp_country: '',
+          sp_address: '',
+          sp_city: '',
+          sp_state: '',
+          sp_zipcode: '',
+          sp_phone_add: '',
+          sp_fax: '',
+          remark: '',
+          personal_info: false,
+          other_details: false,
+          billing: false,
+          shipping: false,
+          remarks: false,
+        
+        
+        
+        
+        }, () => {
           this.hit_Customer_info(Cust_id);
         });
       }
@@ -91,6 +131,62 @@ class CustomerScreen extends PureComponent {
 
   }
 
+  componentDidUpdate(prevProps) {
+    const { network, Cust_id } = this.props;
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          if (Cust_id != 'NO-ID') {
+            this.setState({
+              cust_id: Cust_id, loading: true,
+              primary_contact: '',
+              fname: '',
+              lname: '',
+              company_name: '',
+              display_name: '',
+              contact_email: '',
+              gst_no: '',
+              phone: '',
+              mobile: '',
+              website: '',
+              currency: '',
+              pay_term: '',
+              lang: '',
+              fb: '',
+              twitter: '',
+              country: '',
+              address: '',
+              city: '',
+              state: '',
+              zipcode: '',
+              phone_add: '',
+              fax: '',
+              sp_country: '',
+              sp_address: '',
+              sp_city: '',
+              sp_state: '',
+              sp_zipcode: '',
+              sp_phone_add: '',
+              sp_fax: '',
+              remark: '',
+              personal_info: false,
+              other_details: false,
+              billing: false,
+              shipping: false,
+              remarks: false,
+
+
+
+
+            }, () => {
+              this.hit_Customer_info(Cust_id);
+            });
+          }
+        }
+      }
+    }
+  }
+  
   _infoFunction = () => {
     this.setState(state => ({
       personal_info: !state.personal_info,

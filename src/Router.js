@@ -5,11 +5,12 @@
  */
 
 import React from "react";
-import { View, StatusBar, SafeAreaView } from "react-native";
+import { View,Text, StatusBar, SafeAreaView } from "react-native";
 import Navigation from "@navigation";
 import { connect } from "react-redux";
 import {Color,Config} from '@common';
 import { scale } from "react-native-size-matters";
+
 
 
 class Router extends React.PureComponent {
@@ -39,7 +40,18 @@ class Router extends React.PureComponent {
         <View style={{height:scale(5),
         backgroundColor:Color.bgColor}}/>       
         <Navigation/>
-        
+          <Text style={{
+            
+            backgroundColor: Color.bgColor,
+            fontSize:scale(10),
+            width:'100%',
+            color:'#fff',
+            paddingLeft:scale(10)
+         
+          }}
+          numberOfLines={1}
+          
+           > {'\u00A9'} ARSOL, 2020-2021</Text> 
      </SafeAreaView>
     </>
        );

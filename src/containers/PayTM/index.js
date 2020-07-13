@@ -9,7 +9,7 @@ import {
   TouchableHighlight,
   Keyboard,
   ActivityIndicator,
-  TouchableOpacity,
+  TouchableOpacity, BackHandler
 } from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -26,6 +26,7 @@ import Snackbar from 'react-native-snackbar';
 
 import Paytm from '@philly25/react-native-paytm';
 
+
 class PayTMScreen extends PureComponent {
   constructor(props) {
     super(props);
@@ -40,16 +41,18 @@ class PayTMScreen extends PureComponent {
       checkout_status:true,
       iconStatus:Image.wrong,
       responseTitle:'',
-      statusMessage:''
+      statusMessage:'',
+      back_status:'back'
     };
   } 
 
   componentDidMount() {
-
+    this.setState({back_status:'back'})
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
     Paytm.addListener(Paytm.Events.PAYTM_RESPONSE, this.onPayTmResponse);
-
   }
   componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
     Paytm.removeListener(Paytm.Events.PAYTM_RESPONSE, this.onPayTmResponse);
   }
 
@@ -68,6 +71,7 @@ class PayTMScreen extends PureComponent {
         iconStatus:Images.wrong,
         responseTitle:'REGISTRATION BASIC / ADVANCE FAILED',
         statusMessage:"Payment Cancel!",
+        back_status: 'back'
        
       })
     }else if(status=="Success"){
@@ -79,7 +83,8 @@ class PayTMScreen extends PureComponent {
             payment_success:true,
             iconStatus:Images.wrong,
             responseTitle:'REGISTRATION BASIC / ADVANCE FAILED',
-            statusMessage:RESPMSG
+            statusMessage:RESPMSG,
+            back_status: 'back'
           })
       }else if(STATUS=="TXN_SUCCESS"){
            
@@ -107,14 +112,16 @@ class PayTMScreen extends PureComponent {
                        this.setState({
                           iconStatus:Images.correct,
                           responseTitle:'THANK YOU',
-                         statusMessage: responseJson.data.message
+                          statusMessage: responseJson.data.message,
+                          back_status: 'login'
                          })
               
               } else if (responseJson.data.status == 'failed') {
                 this.setState({
                   iconStatus:Images.wrong,
                   responseTitle:'REGISTRATION BASIC / ADVANCE FAILED',
-                   statusMessage: responseJson.data.message
+                   statusMessage: responseJson.data.message,
+                  back_status: 'back'
                  })
                 
                  } else {
@@ -147,6 +154,7 @@ class PayTMScreen extends PureComponent {
             });
             this.setState({
               loading: false,
+              back_status: 'back'
             });
           } else if (responseJson.problem == 'TIMEOUT_ERROR') {
             Snackbar.show({
@@ -156,6 +164,7 @@ class PayTMScreen extends PureComponent {
             });
             this.setState({
               loading: false,
+              back_status: 'back'
             });
           } else {
             Snackbar.show({
@@ -165,6 +174,7 @@ class PayTMScreen extends PureComponent {
             });
             this.setState({
               loading: false,
+              back_status: 'back'
             });
           }
         }
@@ -173,6 +183,7 @@ class PayTMScreen extends PureComponent {
         console.error(error);
         this.setState({
           loading: false,
+          back_status: 'back'
         });
       });
    
@@ -188,9 +199,29 @@ class PayTMScreen extends PureComponent {
 
   };
   
-  handlePress() {
-    this.props.navigation.goBack()
-  }
+  handleBackButton =()=> { 
+    
+    const {back_status} = this.state
+
+    if (this.props.isFocused) {
+     
+
+      if (back_status == 'back') {
+        this.props.navigation.goBack()
+      } else if (back_status=='login') {
+        this.props.navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              { name: 'Auth' },
+            ],
+          })
+        )
+      }
+    }
+}
+
+
   checkoutPress(){
     const { paytm_details } = this.props.route.params;
     console.log("payTM",JSON.stringify(paytm_details))
@@ -229,14 +260,15 @@ class PayTMScreen extends PureComponent {
             alignItems: 'center',
             backgroundColor: '#F6F6F6',
           }}>
+
+         
+
           <TouchableHighlight
             activeOpacity={0.6}
             underlayColor="#DDDDDD"
-            onPress={() => {
-              this.handlePress();
-            }}
+            onPress={this.handleBackButton}
             style={{
-              height: 30,
+              height: scale(30),
               width: scale(30),
               borderRadius: scale(30) / 2,
               justifyContent: 'center',
@@ -267,10 +299,11 @@ class PayTMScreen extends PureComponent {
   <View style={{alignItems:'center', justifyContent: 'center'}}>
                             <ActivityIndicator
                                 animating={this.state.processing}
-                                style={{height: 80}}
+                                style={{height: scale(80)}}
                                 color="black"
                                 size="large"/>
-                            <Text style={{marginTop: 5, fontSize: 15, fontWeight: 'bold'}}>
+                            <Text style={{marginTop: scale(5), 
+                            fontSize: 15, fontWeight: 'bold'}}>
                             {this.state.payment_text}</Text>
                         </View>
         </View>
@@ -328,8 +361,10 @@ class PayTMScreen extends PureComponent {
               source={Images.paytm}
             />
 
-          <Text style={{fontSize:scale(20),color:"#fff",marginTop:scale(10)}}>Registration Fees</Text>
-          <Text style={{fontSize:scale(14),color:"#fff",marginTop:scale(16),textAlign:'center'}}>
+         <Text style={{fontSize:scale(14),
+         color:"#fff",
+         marginTop:scale(16),
+         textAlign:'center',width:scale(200)}}>
           Amount ₹{paytm_details.TXN_AMOUNT} {"\n"}
           Mobile {paytm_details.MOBILE_NO}  {"\n"}
           Email {paytm_details.EMAIL} 

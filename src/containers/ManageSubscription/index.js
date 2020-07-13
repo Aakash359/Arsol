@@ -48,7 +48,8 @@ class ManageSubscriptionScreen extends PureComponent {
       prompt: false,
       payCancel: false,
       show_list: [],
-      refresh:false
+      refresh:false,
+      plan_id:null
 
     }
   }
@@ -63,12 +64,39 @@ class ManageSubscriptionScreen extends PureComponent {
           backgroundColor: "red"
         });
       } else {
-        this.setState({ loading: true }, () => {
+        this.setState({ loading: true,
+          activeIndex: 0,
+          prompt: false,
+          payCancel: false,
+          show_list: [],
+          refresh: false,
+          plan_id: null
+        }, () => {
           this.hit_subscription_Api()
         })
       }
     })
     
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          this.setState({
+            loading: true,
+            activeIndex: 0,
+            prompt: false,
+            payCancel: false,
+            show_list: [],
+            refresh: false,
+            plan_id: null
+          }, () => {
+            this.hit_subscription_Api()
+          })
+        }
+      }
+    }
   }
 
 
@@ -185,6 +213,152 @@ class ManageSubscriptionScreen extends PureComponent {
     }
   }
 
+  btn_subscription(){
+    const { network } = this.props;
+    if (!network.isConnected) {
+      Snackbar.show({
+        text: msg.noInternet,
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: "red"
+      });
+    }else{
+      this.setState({
+        loading:true
+      },()=>{
+          this.hit_SubscriptionPlanPaymentApi()
+      })
+    }
+  }
+
+  hit_SubscriptionPlanPaymentApi() {
+    const {user_id,user_type} = this.props
+    
+   ArsolApi.SubscriptionPlanPayment_api(user_id,user_type,this.state.plan_id)
+
+      .then(responseJson => {
+        console.log('SubscriptionPlanPayment_post', responseJson);
+
+        if (responseJson.ok) {
+          this.setState({
+            loading: false,
+            plan_id:null
+          });
+
+          if (responseJson.data != null) {
+            if (responseJson.data.hasOwnProperty('status')) {
+
+              if (responseJson.data.status == 'success') {
+
+                if (responseJson.data.hasOwnProperty('data')) {
+                  if (responseJson.data.data.hasOwnProperty('checksum')) {
+                    if (responseJson.data.checksum != '') {
+
+                      this.props.navigation.navigate('PayTM', {
+                        paytm_details: {
+                          mode: 'Staging', // 'Staging' or 'Production'
+                          MID: responseJson.data.data.paytmparams.MID,
+                          INDUSTRY_TYPE_ID: responseJson.data.data.paytmparams.INDUSTRY_TYPE_ID,
+                          WEBSITE: responseJson.data.data.paytmparams.WEBSITE,
+                          CHANNEL_ID: responseJson.data.data.paytmparams.CHANNEL_ID,
+                          TXN_AMOUNT: responseJson.data.data.paytmparams.TXN_AMOUNT, // String
+                          ORDER_ID: responseJson.data.data.paytmparams.ORDER_ID, // String
+                          EMAIL: responseJson.data.data.paytmparams.EMAIL, // String
+                          MOBILE_NO: responseJson.data.data.paytmparams.MOBILE_NO, // String
+                          CUST_ID: responseJson.data.data.paytmparams.CUST_ID, // String
+                          CHECKSUMHASH: responseJson.data.data.checksum, //From your server using PayTM Checksum Utility 
+                          CALLBACK_URL: responseJson.data.data.paytmparams.CALLBACK_URL,
+                        }
+                      })
+
+
+
+                      
+                    }
+                  } else {
+                    alert(responseJson.data.message)
+
+                    this.props.navigation.dispatch(
+                      CommonActions.reset({
+                        index: 0,
+                        routes: [
+                          { name: 'Auth' },
+                        ],
+                      })
+                    )
+
+                  }
+                }
+
+
+
+
+              } else if (responseJson.data.status == 'failed') {
+                alert(responseJson.data.message)
+
+              } else {
+                Snackbar.show({
+                  text: msg.servErr,
+                  duration: Snackbar.LENGTH_SHORT,
+                  backgroundColor: "red"
+                });
+              }
+            } else {
+              Snackbar.show({
+                text: msg.servErr,
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: "red"
+              });
+            }
+          } else {
+            Snackbar.show({
+              text: msg.servErr,
+              duration: Snackbar.LENGTH_SHORT,
+              backgroundColor: "red"
+            });
+          }
+        } else {
+          if (responseJson.problem == 'NETWORK_ERROR') {
+            Snackbar.show({
+              text: msg.netError,
+              duration: Snackbar.LENGTH_SHORT,
+              backgroundColor: Color.lgreen
+            });
+            this.setState({
+              loading: false,
+              plan_id: null
+            });
+          } else if (responseJson.problem == 'TIMEOUT_ERROR') {
+            Snackbar.show({
+              text: msg.serTimErr,
+              duration: Snackbar.LENGTH_SHORT,
+              backgroundColor: Color.lgreen
+            });
+            this.setState({
+              loading: false,
+              plan_id: null
+            });
+          } else {
+            Snackbar.show({
+              text: msg.servErr,
+              duration: Snackbar.LENGTH_SHORT,
+              backgroundColor: "red"
+            });
+            this.setState({
+              loading: false,
+              plan_id: null
+            });
+          }
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        this.setState({
+          loading: false,
+          plan_id: null
+        });
+      });
+  }
+
  hexToRGB(h) {
   let r = 0, g = 0, b = 0, c = 0.3;
 
@@ -195,7 +369,7 @@ class ManageSubscriptionScreen extends PureComponent {
   
 
    return "rgba(" + +r + "," + +g + "," + +b + ","+ +c+")";
-}
+  }
 
   _renderItem = ({ item, index }) => {
     return (
@@ -317,7 +491,7 @@ class ManageSubscriptionScreen extends PureComponent {
             }}
             disabled={!item.btn_visibilty}
             onPress={() => {
-            this.setState({ prompt: true })
+              this.setState({ prompt: true, plan_id: item.plan_id })
             }}>
             <Text style={{
               color: "#fff",
@@ -395,7 +569,8 @@ class ManageSubscriptionScreen extends PureComponent {
                   onPress={() => {
                     this.setState({
                       prompt: false,
-                      payCancel: true
+                      payCancel: true,
+                      plan_id:null
 
                     });
                   }}>
@@ -422,9 +597,9 @@ class ManageSubscriptionScreen extends PureComponent {
                   onPress={() => {
                     this.setState({
                       prompt: false,
-                     
-
-                    });
+                     },()=>{
+                        this.btn_subscription()
+                     });
                   }}
                   >
                   <Text
