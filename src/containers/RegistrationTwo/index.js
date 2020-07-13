@@ -55,11 +55,54 @@ class RegistrationTwoScreen extends PureComponent {
         backgroundColor: "red"
       });
     } else {
-      this.setState({ loading: true }, () => {
+      this.setState({ loading: true,
+        currency_list: [],
+        constiution_list: [],
+
+        panNo: '',
+        gstNo: '',
+        orgName: '',
+        Currency: '47',
+        Constitution: '',
+        BankName: '',
+        AccountName: '',
+        AccountNumber: '',
+        Ifsc: '',
+        org_tag: '',
+        focus: false, }, () => {
         this.hit_Currency_list()
         this.hit_Constituion_list()
       })
 
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          this.setState({
+            loading: true,
+            currency_list: [],
+            constiution_list: [],
+
+            panNo: '',
+            gstNo: '',
+            orgName: '',
+            Currency: '47',
+            Constitution: '',
+            BankName: '',
+            AccountName: '',
+            AccountNumber: '',
+            Ifsc: '',
+            org_tag: '',
+            focus: false,
+          }, () => {
+            this.hit_Currency_list()
+            this.hit_Constituion_list()
+          })
+        }
+      }
     }
   }
 
@@ -75,10 +118,7 @@ class RegistrationTwoScreen extends PureComponent {
       focus: false
     })
   }
-  _scrollToInput(reactNode: pan) {
-    // Add a 'scroll' ref to your ScrollView
-    this.scroll.props.scrollToFocusedInput(reactNode)
-  }
+ 
 
   //GST
   onFocusGST() {
@@ -92,10 +132,7 @@ class RegistrationTwoScreen extends PureComponent {
       focus_g: false
     })
   }
-  _scrollToInput(reactNode: gst) {
-    // Add a 'scroll' ref to your ScrollView
-    this.scroll.props.scrollToFocusedInput(reactNode)
-  }
+ 
 
   //ORG Name
   onFocusOrg() {
@@ -585,10 +622,7 @@ class RegistrationTwoScreen extends PureComponent {
                 >
 
                   <TextInput
-                    onFocus={(pan: Pan) => {
-                      // `bind` the function if you're using ES6 classes
-                      this._scrollToInput(ReactNative.findNodeHandle(first.target))
-                    }}
+                   
                     onBlur={() => this.onBlur()}
                     onFocus={() => this.onFocus()}
                     style={styles.input}
@@ -648,10 +682,7 @@ class RegistrationTwoScreen extends PureComponent {
                 >
 
                   <TextInput
-                    onFocus={(gst: Gst) => {
-                      // `bind` the function if you're using ES6 classes
-                      this._scrollToInput(ReactNative.findNodeHandle(gst.target))
-                    }}
+                   
                     onBlur={() => this.onBlurGST()}
                     onFocus={() => this.onFocusGST()}
                     ref={(input) => { this.secondTextInput = input; }}

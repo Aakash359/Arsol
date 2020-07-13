@@ -89,6 +89,33 @@ class CustomerLedgerScreen extends PureComponent {
    
   }
 
+
+  componentDidUpdate(prevProps) {
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          this.setState({
+            loading: true,
+            refresh: false,
+            onEndReachedCalledDuringMomentum: true,
+            show_list: [],
+            data2: '',
+            customer_list: [],
+            customer_value: '',
+            start_date: moment(new Date()).format('DD/MM/YYYY'),
+            end_date: moment(new Date()).format('DD/MM/YYYY'),
+
+
+            pdf_data: [],
+          }, () => {
+            this.hit_CompanyNameApi();
+
+          });
+        }
+      }
+    }
+  }
+
   renderTableHeader() {
     var header = [
       'Date',

@@ -68,11 +68,54 @@ class InvoiceReportDetailScreen extends PureComponent {
       backgroundColor: "red"
     });
   }else{
-    this.setState({loading:true},()=>{
+    this.setState({
+      loading: true, refresh: false,
+      load_more: false,
+      onEndReachedCalledDuringMomentum: true,
+      page: 0,
+      show_list: [],
+      filter: false,
+      display_name: '',
+      invoice_number: '',
+      ch_all: true,
+      ch_invoice: false,
+      ch_invoice_no: false,
+      ch_display_name: false,
+      start_date: moment(new Date()).format('DD/MM/YYYY'),
+      end_date: moment(new Date()).format('DD/MM/YYYY'),},()=>{
    
       this.hit_invoicereportsApi()
    
     })}
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          this.setState({
+            loading: true, refresh: false,
+            load_more: false,
+            onEndReachedCalledDuringMomentum: true,
+            page: 0,
+            show_list: [],
+            filter: false,
+            display_name: '',
+            invoice_number: '',
+            ch_all: true,
+            ch_invoice: false,
+            ch_invoice_no: false,
+            ch_display_name: false,
+            start_date: moment(new Date()).format('DD/MM/YYYY'),
+            end_date: moment(new Date()).format('DD/MM/YYYY'),
+          }, () => {
+
+            this.hit_invoicereportsApi()
+
+          })
+        }
+      }
+    }
   }
 
   renderTableHeader() {

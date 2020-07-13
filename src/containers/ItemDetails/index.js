@@ -62,11 +62,62 @@ class ItemDetailsScreen extends PureComponent {
         backgroundColor: "red"
       });
     } else {
-      this.setState({ loading: true, ed_id: "" }, () => {
+      this.setState({
+        loading: true, refresh: false,
+        load_more: false,
+        onEndReachedCalledDuringMomentum: true,
+        addItem: false,
+        page: 0,
+        show_list: [],
+
+        item_type: "Goods",
+        name: "",
+        unit: '',
+        rate: "",
+        hsn_sac_code: "",
+        gst: "",
+        des: "",
+        ed_id: '',
+
+        unit_list: [],
+        gst_list: [],}, () => {
         this.hit_itemDetailApi()
         this.hit_unit_listApi()
         this.hit_gst_listApi()
       })
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          this.setState({
+            loading: true, refresh: false,
+            load_more: false,
+            onEndReachedCalledDuringMomentum: true,
+            addItem: false,
+            page: 0,
+            show_list: [],
+
+            item_type: "Goods",
+            name: "",
+            unit: '',
+            rate: "",
+            hsn_sac_code: "",
+            gst: "",
+            des: "",
+            ed_id: '',
+
+            unit_list: [],
+            gst_list: [],
+          }, () => {
+            this.hit_itemDetailApi()
+            this.hit_unit_listApi()
+            this.hit_gst_listApi()
+          })
+        }
+      }
     }
   }
 

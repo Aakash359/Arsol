@@ -74,7 +74,30 @@ class HomeScreen extends PureComponent {
         backgroundColor: "red"
       });
     } else {
-      this.setState({ loading: true }, () => {
+      this.setState({ loading: true ,
+        refresh: false,
+        dashboard: "false",
+
+        invoice: "",
+        estimate: "",
+        credit_note: "",
+        sale: "",
+        items: "",
+        customers: "",
+
+        page: 0,
+        addItem: false,
+        item_type: "Goods",
+        name: "",
+        unit: '',
+        rate: "",
+        hsn_sac_code: "",
+        gst: "",
+        des: "",
+        unit_list: [],
+        gst_list: [],
+        chart_list: [],
+      }, () => {
           this.hit_homeApi(user_id, user_type),
           this.hit_unit_listApi(),
           this.hit_gst_listApi()
@@ -82,6 +105,46 @@ class HomeScreen extends PureComponent {
      
       })
 
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    const { user_id, user_type } = this.props;
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+            this.setState({ loading: true,
+              refresh: false,
+              dashboard: "false",
+
+              invoice: "",
+              estimate: "",
+              credit_note: "",
+              sale: "",
+              items: "",
+              customers: "",
+
+              page: 0,
+              addItem: false,
+              item_type: "Goods",
+              name: "",
+              unit: '',
+              rate: "",
+              hsn_sac_code: "",
+              gst: "",
+              des: "",
+              unit_list: [],
+              gst_list: [],
+              chart_list: [],
+            }, () => {
+            this.hit_homeApi(user_id, user_type),
+            this.hit_unit_listApi(),
+            this.hit_gst_listApi()
+            this.hit_chartApi()
+
+          })
+        }
+      }
     }
   }
 

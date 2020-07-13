@@ -75,9 +75,39 @@ class BankDetailsScreen extends PureComponent {
         ifsc_code: '',
         edit_id: "",},()=>{
         this.hit_bankDetailApi()
-      })} 
+      })
+    
+    } 
   })
   
+  }
+
+
+  componentDidUpdate(prevProps) {
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          this.setState({
+            loading: true,
+            refresh: false,
+            load_more: false,
+            onEndReachedCalledDuringMomentum: true,
+            addItem: false,
+            page: 0,
+            show_list: [],
+
+
+            b_name: "",
+            ac_name: '',
+            ac_no: '',
+            ifsc_code: '',
+            edit_id: "",
+          }, () => {
+            this.hit_bankDetailApi()
+          })
+        }
+      }
+    }
   }
 
 //add

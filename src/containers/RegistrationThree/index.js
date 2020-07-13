@@ -57,13 +57,71 @@ class RegistrationThreeScreen extends PureComponent {
         backgroundColor: "red"
       });
     } else {
-      this.setState({ loading: true }, () => {
+      this.setState({
+        loading: true, country_list: [],
+        subscription_list: [],
+        state_list: [],
+
+        regNo: '',
+        pcno: '',
+        scno: '',
+        country: '96',
+        address: '',
+        street: '',
+        state_v: '',
+        city: '',
+        zipcode: '',
+        subplan: '1',
+        tandc: '',
+        timezone: '',
+        ccode: '',
+        invoicno: '',
+        image_data: '',
+        image_name: '', }, () => {
         this.getTimeZone()
         this.hit_Country_list()
         this.hit_Subscription_list( regData.email)
       })
      }
   }
+
+  componentDidUpdate(prevProps) {
+    const { network, regData } = this.props 
+    if (this.props.network.isConnected != prevProps.network.isConnected) {
+      if (this.props.network.isConnected) {
+        if (this.props.navigation.isFocused()) {
+          this.setState({
+            loading: true, country_list: [],
+            subscription_list: [],
+            state_list: [],
+
+            regNo: '',
+            pcno: '',
+            scno: '',
+            country: '96',
+            address: '',
+            street: '',
+            state_v: '',
+            city: '',
+            zipcode: '',
+            subplan: '1',
+            tandc: '',
+            timezone: '',
+            ccode: '',
+            invoicno: '',
+            image_data: '',
+            image_name: '',
+          }, () => {
+            this.getTimeZone()
+            this.hit_Country_list()
+            this.hit_Subscription_list(regData.email)
+          })
+        }
+      }
+    }
+  }
+
+
 
   getTimeZone = async() => {
     const timeZone = await TimeZone.getTimeZone().then(zone => zone);
