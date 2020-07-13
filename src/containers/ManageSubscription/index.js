@@ -236,7 +236,7 @@ class ManageSubscriptionScreen extends PureComponent {
    ArsolApi.SubscriptionPlanPayment_api(user_id,user_type,this.state.plan_id)
 
       .then(responseJson => {
-        console.log('SubscriptionPlanPayment_post', responseJson);
+        console.log('SubscriptionPlanPayment_api', responseJson);
 
         if (responseJson.ok) {
           this.setState({

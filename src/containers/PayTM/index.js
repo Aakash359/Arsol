@@ -42,18 +42,16 @@ class PayTMScreen extends PureComponent {
       iconStatus:Image.wrong,
       responseTitle:'',
       statusMessage:'',
-      back_status:'back'
+
     };
   } 
 
   componentDidMount() {
-    this.setState({back_status:'back'})
-    BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
+
     Paytm.addListener(Paytm.Events.PAYTM_RESPONSE, this.onPayTmResponse);
   }
   componentWillUnmount() {
-    BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
-    Paytm.removeListener(Paytm.Events.PAYTM_RESPONSE, this.onPayTmResponse);
+   Paytm.removeListener(Paytm.Events.PAYTM_RESPONSE, this.onPayTmResponse);
   }
 
   onPayTmResponse = (resp) => {
@@ -71,7 +69,7 @@ class PayTMScreen extends PureComponent {
         iconStatus:Images.wrong,
         responseTitle:'REGISTRATION BASIC / ADVANCE FAILED',
         statusMessage:"Payment Cancel!",
-        back_status: 'back'
+      
        
       })
     }else if(status=="Success"){
@@ -84,7 +82,7 @@ class PayTMScreen extends PureComponent {
             iconStatus:Images.wrong,
             responseTitle:'REGISTRATION BASIC / ADVANCE FAILED',
             statusMessage:RESPMSG,
-            back_status: 'back'
+            
           })
       }else if(STATUS=="TXN_SUCCESS"){
            
@@ -113,7 +111,7 @@ class PayTMScreen extends PureComponent {
                           iconStatus:Images.correct,
                           responseTitle:'THANK YOU',
                           statusMessage: responseJson.data.message,
-                          back_status: 'login'
+                        
                          })
               
               } else if (responseJson.data.status == 'failed') {
@@ -121,7 +119,7 @@ class PayTMScreen extends PureComponent {
                   iconStatus:Images.wrong,
                   responseTitle:'REGISTRATION BASIC / ADVANCE FAILED',
                    statusMessage: responseJson.data.message,
-                  back_status: 'back'
+                  
                  })
                 
                  } else {
@@ -154,7 +152,7 @@ class PayTMScreen extends PureComponent {
             });
             this.setState({
               loading: false,
-              back_status: 'back'
+              
             });
           } else if (responseJson.problem == 'TIMEOUT_ERROR') {
             Snackbar.show({
@@ -164,7 +162,7 @@ class PayTMScreen extends PureComponent {
             });
             this.setState({
               loading: false,
-              back_status: 'back'
+            
             });
           } else {
             Snackbar.show({
@@ -174,7 +172,7 @@ class PayTMScreen extends PureComponent {
             });
             this.setState({
               loading: false,
-              back_status: 'back'
+          
             });
           }
         }
@@ -183,7 +181,7 @@ class PayTMScreen extends PureComponent {
         console.error(error);
         this.setState({
           loading: false,
-          back_status: 'back'
+       
         });
       });
    
@@ -199,27 +197,7 @@ class PayTMScreen extends PureComponent {
 
   };
   
-  handleBackButton =()=> { 
-    
-    const {back_status} = this.state
 
-    if (this.props.isFocused) {
-     
-
-      if (back_status == 'back') {
-        this.props.navigation.goBack()
-      } else if (back_status=='login') {
-        this.props.navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [
-              { name: 'Auth' },
-            ],
-          })
-        )
-      }
-    }
-}
 
 
   checkoutPress(){
@@ -266,7 +244,11 @@ class PayTMScreen extends PureComponent {
           <TouchableHighlight
             activeOpacity={0.6}
             underlayColor="#DDDDDD"
-            onPress={this.handleBackButton}
+            onPress={()=>{
+   
+                this.props.navigation.goBack()
+             
+            }}
             style={{
               height: scale(30),
               width: scale(30),
@@ -323,7 +305,7 @@ class PayTMScreen extends PureComponent {
           <Text style={{fontSize:scale(20),color:"grey"}}>{this.state.title_status}</Text>
           <Text style={{fontSize:scale(14),color:"grey",marginTop:scale(16)}}>{this.state.statusMessage}</Text>
 
-          <TouchableOpacity style={{backgroundColor:"#ffe01b",
+          {/* <TouchableOpacity style={{backgroundColor:"#ffe01b",
                        marginTop:scale(30),
                         paddingHorizontal:scale(16),
                         paddingVertical:scale(8)}}
@@ -341,7 +323,7 @@ class PayTMScreen extends PureComponent {
                           
                         >
             <Text style={{fontSize:scale(15),fontWeight:"bold"}}>LOGIN</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>:null
 }
 
