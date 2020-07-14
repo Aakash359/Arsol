@@ -508,7 +508,7 @@ class ItemDetailsScreen extends PureComponent {
 
         });
       });
-  }
+  } 
 
   hit_itemDetailApi() {
     const { user_id, user_type } = this.props
@@ -710,7 +710,7 @@ class ItemDetailsScreen extends PureComponent {
       des: show_list[i].item_des,
       addItem: true,
       ed_id: item
-    })
+    }) 
 
 
 
