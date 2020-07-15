@@ -134,9 +134,10 @@ Keyboard.dismiss()
         backgroundColor: "red"
       });
     }else{
-      this.setState({loading:true,addItem:false, ed_id:"",},()=>{
-        this.hit_addUserApi(user_id,user_type,
-          fname,
+      this.setState({loading:true,addItem:false},()=>{
+        this.hit_addUserApi(user_id,
+  user_type,
+  fname,
   lname,
   u_type,
   email_id,
@@ -172,8 +173,11 @@ Keyboard.dismiss()
                  if(responseJson.data.hasOwnProperty("data")){
                        if(responseJson.data.data.length>0){
                          this.setState({
-                          show_list:[...this.state.show_list, ...responseJson.data.data],
-                           is_create: responseJson.data.is_create
+                           show_list:[...this.state.show_list, ...responseJson.data.data],
+                           is_create: responseJson.data.is_create,
+                          
+                           
+
                         })
                          Snackbar.show({
                           text: responseJson.data.message,
@@ -255,8 +259,7 @@ Keyboard.dismiss()
     });
   }
 
-
-        hit_addUserApi(user_id,user_type,
+  hit_addUserApi(user_id,user_type,
       fname,
       lname,
       u_type,
@@ -298,7 +301,7 @@ ed_id)
                       this.setState({
                         fname: "",
                         lname: "",
-                        u_type: "",
+                        u_type: "Admin",
                         email_id: "",
                         password: "",
                       }, () => {
@@ -378,7 +381,7 @@ ed_id)
 
         });
       });
-}
+  }
 
 
 hit_userDetailApi(){
@@ -547,9 +550,9 @@ GetItem (i) {
      addItem:true,
      fname: show_list[i].fname,
      lname: show_list[i].lname,
-     u_type: 'Admin',
+     u_type: show_list[i].usertype,
      email_id: show_list[i].email_id,
-     password: show_list[i].password,
+     password: '',
      ed_id: show_list[i].user_id,
     })
   }
@@ -822,7 +825,7 @@ _addUserRender(){
                     inputAndroid: styles.inputAndroid,
                   }}
                   onValueChange={(u_type) => {
-                    this.setState({ item_type: u_type })
+                    this.setState({ u_type: u_type })
 
                   }}
                   value={this.state.u_type}
@@ -887,13 +890,16 @@ _addUserRender(){
               <View style={styles.userInput}>
 
                 <TextInput
+                  secureTextEntry={true}
+
                   style={styles.input}
-                  keyboardType='email-address'
+               
                   autoCorrect={false}
                   autoCapitalize={'none'}
                   underlineColorAndroid="transparent"
                   onChangeText={password => this.setState({ password })}
                   value={this.state.password}
+           
                 />
 
               </View>
@@ -946,15 +952,14 @@ _addUserRender(){
                 }}
                 onPress={() => {
                   this.setState({
-                    addItem: false, item_type: "Goods",
-                    name: "",
-                    unit: '',
-                    rate: "",
-                    hsn_sac_code: "",
-                    gst: "",
-                    des: "",
-                    ed_id: ""
-                  });
+                    addItem: false,
+                    fname: '',
+                    lname: '',
+                    u_type: 'Admin',
+                    email_id: '',
+                    password: '',
+                    ed_id: '',
+                  })
                 }}
 
               
@@ -978,46 +983,7 @@ _addUserRender(){
   )
 }
 
-renderFOB() {
-   
-    return (
-      <TouchableOpacity activeOpacity={0.5}
-        style={{
-          position: 'absolute',
-          width: scale(50),
-          height: scale(50),
-          alignItems: 'center',
-          justifyContent: 'center',
-          right: 30,
-          bottom: 30,
-          backgroundColor: "#fff",
-          borderRadius: scale(25),
-          elevation: 20,
-          shadowColor: "#000000",
-          shadowOpacity: 0.8,
-          shadowRadius: 2,
-          shadowOffset: {
-            height: 1,
-            width: 0
-          }
 
-        }}
-        onPress={() => {
-          this.setState({ addItem: true, ed_id: "" })
-        }}
-      >
-
-        <Image source={Images.add}
-
-          style={{
-            resizeMode: 'contain',
-            width: 25,
-            height: 25,
-          }} />
-
-      </TouchableOpacity>
-    );
-  }
 
   renderHeader() {
     return (
@@ -1043,6 +1009,7 @@ renderFOB() {
       </View>
     )
   }
+
 
 
   renderTitle() {
@@ -1222,12 +1189,19 @@ return (
           width: '100%',
 
         }}
-        disabled={this.state.is_create?true:false}
+        disabled={this.state.is_create?false:true}
 
-          onPress={() => {
-          
-            this.setState({ addItem: true, ed_id: "" })
-          }}
+            onPress={() => {
+
+              this.setState({ addItem: true,
+                              ed_id: "",
+                fname: '',
+                lname: '',
+                
+                email_id: '',
+                password: '',
+               })
+            }}
 
 
         >
