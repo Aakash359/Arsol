@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 
 import {
-    View, Keyboard, TouchableHighlight,
+    View, Keyboard, TouchableHighlight, ImageBackground, Dimensions,
 
     Text, Modal, ScrollView, TextInput,
     StyleSheet, FlatList, TouchableOpacity, Alert, RefreshControl, Image, ActivityIndicator
@@ -36,25 +36,65 @@ class UserDetailsScreen extends PureComponent {
             u_type: 'Admin',
             email_id: '',
             password: '',
+            ed_id: "",
+            is_create: true
         }
 
     }
 
     componentDidMount() {
         const { network } = this.props;
-        if (!network.isConnected) {
-            Snackbar.show({
-                text: msg.noInternet,
-                duration: Snackbar.LENGTH_SHORT,
-                backgroundColor: "red"
-            });
-        } else {
-            this.setState({ loading: true, ed_id: "", }, () => {
-                this.hit_userDetailApi()
-            })
-        }
+        this._subscribe = this.props.navigation.addListener('focus', () => {
+            if (!network.isConnected) {
+                Snackbar.show({
+                    text: msg.noInternet,
+                    duration: Snackbar.LENGTH_SHORT,
+                    backgroundColor: "red"
+                });
+            } else {
+                this.setState({
+                    loading: true,
+                    ed_id: "",
+                    refresh: false,
+                    addItem: false,
+                    show_list: [],
+                    fname: '',
+                    lname: '',
+                    u_type: 'Admin',
+                    email_id: '',
+                    password: '',
+                    is_create: true
+                }, () => {
+                    this.hit_userDetailApi()
+                })
+            }
+        })
     }
 
+
+    componentDidUpdate(prevProps) {
+        if (this.props.network.isConnected != prevProps.network.isConnected) {
+            if (this.props.network.isConnected) {
+                if (this.props.navigation.isFocused()) {
+                    this.setState({
+                        loading: true,
+                        ed_id: "",
+                        refresh: false,
+                        addItem: false,
+                        show_list: [],
+                        fname: '',
+                        lname: '',
+                        u_type: 'Admin',
+                        email_id: '',
+                        password: '',
+                        is_create: true
+                    }, () => {
+                        this.hit_userDetailApi()
+                    })
+                }
+            }
+        }
+    }
 
 
     //add
@@ -134,6 +174,7 @@ class UserDetailsScreen extends PureComponent {
                                         if (responseJson.data.data.length > 0) {
                                             this.setState({
                                                 show_list: [...this.state.show_list, ...responseJson.data.data],
+                                                is_create: responseJson.data.is_create
                                             })
                                             Snackbar.show({
                                                 text: responseJson.data.message,
@@ -498,7 +539,7 @@ class UserDetailsScreen extends PureComponent {
 
 
 
-    GetItem(item, i) {
+    GetItem(i) {
         const { show_list } = this.state
 
         this.setState({
@@ -508,105 +549,139 @@ class UserDetailsScreen extends PureComponent {
             u_type: 'Admin',
             email_id: show_list[i].email_id,
             password: show_list[i].password,
-            ed_id: item,
-
+            ed_id: show_list[i].user_id,
         })
-
-
-
     }
 
-    _renderListItem(rowData, index) {
-        console.log(rowData)
-        return (
-            <View style={{
-                padding: scale(10),
-                shadowColor: "#000",
-                shadowOffset: {
-                    width: 0,
-                    height: 9,
-                },
-                shadowOpacity: 0.48,
-                shadowRadius: 11.95,
 
-                elevation: 20,
-                borderRadius: scale(15),
-                backgroundColor: "#fff",
-                marginHorizontal: scale(20),
-                marginVertical: scale(10)
+    _renderListItem(rowData, index) {
+        //console.log(rowData)
+        return (
+
+            <View style={{
+                flexDirection: 'row',
+                borderWidth: scale(0.5),
+                borderColor: '#ccc'
 
             }}
                 key={rowData.index}
             >
-
                 <Text style={{
-                    fontSize: scale(14), fontWeight: 'bold', fontStyle: 'italic',
-                    textTransform: 'capitalize'
+                    padding: scale(10),
+                    width: scale(120),
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
                 }}
-                    numberOfLines={1}
+                    numberOfLines={2}
+                >{rowData.item.fname}</Text>
+                <Text style={{
+                    padding: scale(10),
+                    width: scale(120),
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                }}
+                    numberOfLines={2}
+                >{rowData.item.lname}</Text>
+                <Text style={{
+                    padding: scale(10),
+                    width: scale(100),
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                }}
+                    numberOfLines={2}
+                >{rowData.item.usertype}</Text>
+                <Text style={{
+                    padding: scale(10),
+                    width: scale(100),
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                }}
+                    numberOfLines={2}
                 >{rowData.item.email_id}</Text>
 
-
-
-                <Text style={styles.txt}
-                    numberOfLines={1}
-                >First Name:{rowData.item.fname}</Text>
-
-
-
-                <Text style={styles.txt}
-                    numberOfLines={1}
-                >Last Name:{rowData.item.lname}</Text>
-
-
-
-                <Text style={styles.txt}
-                    numberOfLines={1}
-                >User Type:{rowData.item.usertype}</Text>
-
-
-
-
-
-
-
-                <Text style={styles.txt}
+                <Text style={{
+                    padding: scale(10),
+                    width: scale(100),
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                }}
                     numberOfLines={2}
-                >Create Date:{rowData.item.created_date}</Text>
+                >{rowData.item.created_date}</Text>
+
+                <Text style={{
+                    padding: scale(10),
+                    width: scale(100),
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                }}
+                    numberOfLines={2}
+                >{rowData.item.created_by}</Text>
 
 
-
-                <Text style={styles.txt}
-                    numberOfLines={1}
-                >Created By:{rowData.item.created_by}</Text>
-
-
-                <TouchableHighlight
-                    activeOpacity={1}
-                    underlayColor={'#ddd'}
-                    onPress={() => { this.GetItem(rowData.item.user_id, rowData.index) }}
+                <View
                     style={{
-                        width: scale(40), height: scale(40),
+                        padding: scale(10),
+                        width: scale(100),
                         alignItems: "center",
-                        justifyContent: 'center',
-                        borderRadius: scale(20),
-                        position: 'absolute',
-                        right: -10,
-                        top: -12
+                        justifyContent: "center",
+                        borderColor: '#ddd',
+                        borderRightWidth: scale(1)
                     }}
                 >
 
-                    <Image source={Images.pencil} style={{
-                        width: scale(20), height: scale(20),
+                    <TouchableOpacity
+                        style={{
+                            backgroundColor: Color.btn,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderRadius: scale(5),
+                            minHeight: scale(30),
+                            maxHeight: scale(45),
+                            width: scale(40),
 
 
-                    }} />
+                        }}
+                        onPress={() => { this.GetItem(rowData.index) }}
 
-                </TouchableHighlight>
+                    >
+                        <Text style={{ color: "#fff", fontSize: scale(10) }}>Edit</Text>
+                    </TouchableOpacity>
+
+                </View>
+
+
+
+
+
 
             </View>
+
+
+
+
+
+
         )
     }
+
 
     //additem
 
@@ -840,66 +915,139 @@ class UserDetailsScreen extends PureComponent {
         );
     }
 
-
     renderHeader() {
         return (
             <View
                 style={{
-                    height: scale(50), backgroundColor: "#80d4ff",
-
-                    shadowColor: "#000",
-                    shadowOffset: {
-                        width: 0,
-                        height: 9,
-                    },
-                    shadowOpacity: 0.48,
-                    shadowRadius: 11.95,
-
-                    elevation: 20,
-                    borderRadius: scale(15),
-                    margin: scale(7),
+                    backgroundColor: Color.bgColor,
+                    borderRadius: scale(5),
                     justifyContent: "center",
-                    padding: scale(10)
-
+                    alignItems: "center",
+                    padding: scale(10),
+                    width: scale(170),
+                    alignSelf: 'center'
                 }}
             >
-
-
-
-                <TouchableHighlight
-                    activeOpacity={1}
-                    underlayColor={'#ddd'}
-                    onPress={() => this.props.navigation.toggleDrawer()}
-                    style={{
-                        width: scale(40), height: scale(40),
-
-
-
-                        alignItems: "center",
-                        justifyContent: 'center',
-                        borderRadius: scale(20)
-                    }}
-                >
-
-                    <Image source={Images.menu} style={{
-                        width: scale(20), height: scale(20),
-
-
-                    }} />
-
-                </TouchableHighlight>
-
                 <Text style={{
-                    position: "absolute",
-                    alignSelf: "center",
                     fontSize: scale(18),
-                    color: "#fff",
-                    fontWeight: 'bold'
-                }}>User Details</Text>
+                    color: '#000',
+
+                }}
+                    numberOfLines={1}
+                >User Details</Text>
 
             </View>
         )
     }
+
+
+    renderTitle() {
+        return (
+            <View style={{
+                flexDirection: 'row',
+
+                borderWidth: scale(0.5),
+                borderColor: '#ccc',
+                backgroundColor: '#fff'
+            }}>
+                <Text style={{
+                    padding: scale(10),
+                    width: scale(120),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                }}
+                    numberOfLines={2}
+                >First Name</Text>
+
+                <Text style={{
+
+                    padding: scale(10),
+                    width: scale(120),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                }}
+                    numberOfLines={2}
+                >Last Name</Text>
+                <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                }}
+                    numberOfLines={2}
+                >User Type</Text>
+                <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                }}
+                    numberOfLines={2}
+                >Email Id</Text>
+                <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                }}
+                    numberOfLines={2}
+                >Create Date</Text>
+                <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+                }}
+                    numberOfLines={2}
+                >Create By</Text>
+
+                <Text style={{
+
+                    padding: scale(10),
+                    width: scale(100),
+                    fontWeight: 'bold',
+                    fontSize: scale(12),
+                    borderColor: '#ddd',
+                    borderRightWidth: scale(1)
+
+                }}
+                    numberOfLines={2}
+                ></Text>
+
+
+
+            </View>
+        )
+    }
+
 
 
     render() {
@@ -907,81 +1055,168 @@ class UserDetailsScreen extends PureComponent {
 
 
         return (
-            <View style={{
-                justifyContent: "center", flex: 1,
-                backgroundColor: "#fff"
-            }}>
+            <View>
+                <ImageBackground
+                    style={[styles.fixed, styles.containter]}
+                    source={Images.listbg}>
 
-                <LogoSpinner loading={this.state.loading} />
-
-                <FlatList
-                    showsVerticalScrollIndicator={false}
-                    ListHeaderComponent={this.renderHeader.bind(this)}
-                    stickyHeaderIndices={[0]}
-
-                    contentContainerStyle={{ paddingBottom: scale(5), flexGrow: 1 }}
-                    keyExtractor={(item, index) => index.toString()}
-                    data={this.state.show_list}
-                    ItemSeparatorComponent={this.FlatListItemSeparator}
-                    renderItem={(item, index) => this._renderListItem(item, index)}
-                    bounces={false}
-                    extraData={this.state}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={this.state.refresh}
-                            onRefresh={this.onRefresh.bind(this)}
-                        />
-                    }
-                    ListEmptyComponent={
-                        <View style={{
-                            flex: 1,
-                            alignItems: 'center',
+                    <TouchableHighlight
+                        activeOpacity={1}
+                        underlayColor={'#ddd'}
+                        onPress={() =>
+                            this.props.navigation.toggleDrawer()}
+                        style={{
+                            width: scale(35), height: scale(35),
+                            alignItems: "center",
                             justifyContent: 'center',
+                            backgroundColor: Color.headerTintColor
+                        }}
+                    >
+                        <Image source={Images.menu}
+                            style={{
+                                width: scale(20),
+                                height: scale(20),
+                            }} />
+                    </TouchableHighlight>
+                    {this.renderHeader()}
+
+                    <LogoSpinner loading={this.state.loading} />
+                    <View
+                        style={{
+                            padding: scale(10),
+                            shadowColor: "#000",
+                            shadowOffset: {
+                                width: 0,
+                                height: 9,
+                            },
+                            shadowOpacity: 0.48,
+                            shadowRadius: 11.95,
+
+                            elevation: 20,
+                            borderRadius: scale(15),
+                            backgroundColor: "#fff",
+                            marginHorizontal: scale(10),
+                            marginVertical: scale(20),
+                            height: '70%'
+                        }}
+
+                    >
+                        <View style={{
+                            borderWidth: 1,
+                            height: '100%',
+                            borderColor: '#ccc',
+                            borderRadius: scale(5),
+                            paddingBottom: scale(5)
+
                         }}>
-                            {this.state.loading == false ? (
-                                <View style={{
-                                    flex: 1,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}>
-                                    <View style={{
-                                        backgroundColor: "#ddd",
-                                        width: scale(80), height: scale(80),
-                                        alignItems: "center",
-                                        justifyContent: 'center',
-                                        borderRadius: scale(80) / 2,
-                                        borderWidth: 2,
-                                        borderColor: '#AED581'
-                                    }}>
+                            <TouchableOpacity style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "flex-end",
+                                padding: scale(10),
 
-                                        <Image source={Images.logo} style={{
-                                            resizeMode: 'contain',
-                                            width: scale(50),
-                                            height: scale(50),
-                                        }} />
-                                    </View>
+                                width: '100%',
 
-                                    <Text style={{
-                                        fontSize: scale(15),
-                                        width: scale(150),
-                                        textAlign: 'center',
-                                        marginTop: scale(5)
-                                    }}>No Record Found</Text>
-                                </View>
-                            ) : null}
+                            }}
+                                disabled={this.state.is_create ? true : false}
+
+                                onPress={() => {
+
+                                    this.setState({ addItem: true, ed_id: "" })
+                                }}
+
+
+                            >
+                                <Image source={Images.add}
+                                    style={{
+                                        height: scale(20),
+                                        width: scale(20)
+                                    }}
+                                />
+                                <Text
+                                    style={styles.txt2}
+                                    numberOfLines={1}
+                                >  Add New User</Text>
+                            </TouchableOpacity>
+
+
+                            <ScrollView horizontal={true}>
+                                <FlatList
+
+                                    ListHeaderComponent={this.renderTitle.bind(this)}
+                                    stickyHeaderIndices={[0]}
+                                    contentContainerStyle={{
+                                        paddingBottom: scale(5),
+                                        flexGrow: 1,
+                                    }}
+                                    keyExtractor={(item, index) => index.toString()}
+                                    data={this.state.show_list}
+                                    //  ItemSeparatorComponent={this.FlatListItemSeparator}
+                                    renderItem={(item, index) => this._renderListItem(item, index)}
+                                    bounces={false}
+                                    extraData={this.state}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={this.state.refresh}
+                                            onRefresh={this.onRefresh.bind(this)}
+                                        />
+
+
+                                    }
+                                    ListEmptyComponent={
+                                        <View style={{
+                                            borderWidth: scale(0.5),
+                                            borderColor: '#ccc'
+
+                                        }}>
+                                            {this.state.loading == false ? (
+                                                <Text style={{
+                                                    padding: scale(10),
+                                                    fontSize: scale(12),
+                                                    textAlignVertical: 'center',
+                                                    color: '#ccc'
+
+
+                                                }}>No Data Found..!!</Text>
+                                            ) : null}
+                                        </View>
+                                    }
+                                //pagination
+
+                                // ListFooterComponent={this.renderFooter.bind(this)}
+                                // onEndReachedThreshold={0.01}
+                                // onMomentumScrollBegin={() => this._onMomentumScrollBegin()}
+                                // onEndReached={this.handleLoadMore.bind(this)}
+                                // onScroll={this._onScroll}
+                                />
+
+                            </ScrollView>
+
+
+
+
+
+
+
+
+
                         </View>
-                    }
-
-
-                />
-
-
-                {this._addUserRender()}
-
-                {this.renderFOB()}
 
 
 
+
+
+                    </View>
+
+
+
+
+                    {this._addUserRender()}
+
+
+
+
+                </ImageBackground>
             </View>
         );
     }
@@ -993,7 +1228,17 @@ class UserDetailsScreen extends PureComponent {
 
 const styles = StyleSheet.create({
 
-
+    containter: {
+        width: Dimensions.get("window").width, //for full screen
+        height: Dimensions.get("window").height //for full screen
+    },
+    fixed: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0
+    },
 
     txt: { fontSize: scale(12) },
 

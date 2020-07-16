@@ -29,7 +29,7 @@ class UserDetailsScreen extends PureComponent {
     this.state={
       loading:false,
       refresh:false,
-      addItem:false,
+      addItem:true,
       show_list:[],
       fname:'',
       lname:'',
@@ -134,9 +134,10 @@ Keyboard.dismiss()
         backgroundColor: "red"
       });
     }else{
-      this.setState({loading:true,addItem:false, ed_id:"",},()=>{
-        this.hit_addUserApi(user_id,user_type,
-          fname,
+      this.setState({loading:true,addItem:false},()=>{
+        this.hit_addUserApi(user_id,
+  user_type,
+  fname,
   lname,
   u_type,
   email_id,
@@ -172,8 +173,11 @@ Keyboard.dismiss()
                  if(responseJson.data.hasOwnProperty("data")){
                        if(responseJson.data.data.length>0){
                          this.setState({
-                          show_list:[...this.state.show_list, ...responseJson.data.data],
-                           is_create: responseJson.data.is_create
+                           show_list:[...this.state.show_list, ...responseJson.data.data],
+                           is_create: responseJson.data.is_create,
+                          
+                           
+
                         })
                          Snackbar.show({
                           text: responseJson.data.message,
@@ -255,8 +259,7 @@ Keyboard.dismiss()
     });
   }
 
-
-        hit_addUserApi(user_id,user_type,
+  hit_addUserApi(user_id,user_type,
       fname,
       lname,
       u_type,
@@ -298,7 +301,7 @@ ed_id)
                       this.setState({
                         fname: "",
                         lname: "",
-                        u_type: "",
+                        u_type: "Admin",
                         email_id: "",
                         password: "",
                       }, () => {
@@ -378,7 +381,7 @@ ed_id)
 
         });
       });
-}
+  }
 
 
 hit_userDetailApi(){
@@ -547,9 +550,9 @@ GetItem (i) {
      addItem:true,
      fname: show_list[i].fname,
      lname: show_list[i].lname,
-     u_type: 'Admin',
+     u_type: show_list[i].usertype,
      email_id: show_list[i].email_id,
-     password: show_list[i].password,
+     password: '',
      ed_id: show_list[i].user_id,
     })
   }
@@ -699,163 +702,278 @@ _addUserRender(){
 
  
       
-   <ScrollView style={{backgroundColor: 'rgba(0,0,0,0.5)'}}
-     contentContainerStyle={{flexGrow : 1,
-      justifyContent : 'center',
-      alignItems: "center",
-      padding:scale(5)}}
-      keyboardShouldPersistTaps="handled"
-     >
-
-
-    <View>
-
-
-      <View style={{
-                backgroundColor: 'white',
-      width: '90%',
-      padding: scale(10),
-      borderRadius: scale(5),
-      alignItems:'center'
-      }}>
-
-
-
-<Text style={styles.txt_h}>First Name</Text>
- <View style={styles.userInput}>
-
- <TextInput
- style={styles.input}
-
- autoCorrect={false}
- autoCapitalize={'none'}
-
- placeholderTextColor="grey"
- underlineColorAndroid="transparent"
- onChangeText={fname => this.setState({ fname })}
- value={this.state.fname}
- />
- </View>
-
- <Text style={styles.txt_h}>Last Name</Text>
- <View style={styles.userInput}>
-
- <TextInput
- style={styles.input}
-
- autoCorrect={false}
- autoCapitalize={'none'}
-
- placeholderTextColor="grey"
- underlineColorAndroid="transparent"
- onChangeText={lname => this.setState({ lname })}
- value={this.state.lname}
- />
- </View>
-
- <Text style={styles.txt_h}>User type</Text>
- <View style={styles.userInput}>
-
-<RNPickerSelect
-     placeholder={{}}
-items={[
-{ label: 'Admin', value: 'Admin' },
-{ label: 'User', value: 'User' },
-
-]}
-onValueChange={(u_type) =>{this.setState({item_type:u_type})
-      
+        <ScrollView style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          contentContainerStyle={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: "center",
+            padding: scale(5)
           }}
-value={this.state.u_type}
-/>
-
-</View>
-
- <Text style={styles.txt_h}>Email Id</Text>
- <View style={styles.userInput}>
-
- <TextInput
- style={styles.input}
- keyboardType='email-address'
- autoCorrect={false}
- autoCapitalize={'none'}
-
- placeholderTextColor="grey"
- underlineColorAndroid="transparent"
- onChangeText={email_id => this.setState({ email_id })}
- value={this.state.email_id}
- />
- </View>
-
- <Text style={styles.txt_h}>Password</Text>
- <View style={styles.userInput}>
-
- <TextInput
- style={styles.input}
-
- autoCorrect={false}
- autoCapitalize={'none'}
-secureTextEntry
- placeholderTextColor="grey"
- underlineColorAndroid="transparent"
- onChangeText={password => this.setState({ password })}
- value={this.state.password}
- />
- </View>
+          keyboardShouldPersistTaps="handled"
+        >
 
 
-<View style={{flexDirection:"row",
-          justifyContent:'space-between'
-        }}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={{
-            width: scale(100),
-      height: scale(40),
-      padding: scale(10),
-      backgroundColor: '#3D8EE1',
-      borderRadius: scale(8),
-      margin:scale(5)
-    
-          }}
-          onPress={() => {
-            this.setState({addItem: false,  item_type:"Goods",
-    name:"",
-    unit:'',
-    rate:"",
-    hsn_sac_code:"",
-    gst:"",
-    des:"",});
+          <View style={{
+            backgroundColor: "#fff",
+            margin: scale(15),
+            width: "95%",
+            borderRadius: scale(5),
+            padding: scale(20)
           }}>
-          <Text style={{        color: '#fff', 
-           fontSize: scale(15),
-          textAlign: 'center'}}> Cancel </Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={{
-            width: scale(100),
-      height: scale(40),
-      padding: scale(10),
-      backgroundColor: '#3D8EE1',
-      borderRadius: scale(8),
-      margin:scale(5)
-          }}
-          onPress={() => {
-          this._addUser_fun()
-          }}>
-          <Text style={{        color: '#fff', 
-           fontSize: scale(15),
-          textAlign: 'center'}}> Save </Text>
-        </TouchableOpacity>
 
-        </View>
+     
+            <Text style={{
+              fontSize: scale(18),
+              fontWeight: 'bold',
+              marginBottom: scale(10)
+            }}>{this.state.ed_id == "" ? "Add User" : "Update User"}</Text>
 
-    
-</View>
 
-        
+            <View style={{
+              flexDirection: "row",
+              justifyContent: "space-between", alignItems: "center",
+              marginTop: scale(10)
+            }}
+            >
+
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={styles.txt_h}>First Name</Text>
+                <Text style={{
+                  color: 'red', fontSize: scale(15),
+                  textAlignVertical: "center"
+                }}> *</Text>
+              </View>
+
+
+              <View style={styles.userInput}>
+
+                <TextInput
+                  style={styles.input}
+                  autoCorrect={false}
+                  autoCapitalize={'none'}
+                  underlineColorAndroid="transparent"
+                  onChangeText={fname => this.setState({ fname })}
+                  value={this.state.fname}
+                />
+
+              </View>
+
+
+            </View>
+
+            <View style={{
+              flexDirection: "row",
+              justifyContent: "space-between", alignItems: "center",
+              marginTop: scale(10)
+            }}
+            >
+
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={styles.txt_h}>Last Name</Text>
+                <Text style={{
+                  color: 'red', fontSize: scale(15),
+                  textAlignVertical: "center"
+                }}> *</Text>
+              </View>
+
+
+              <View style={styles.userInput}>
+
+                <TextInput
+                  style={styles.input}
+                  autoCorrect={false}
+                  autoCapitalize={'none'}
+                  underlineColorAndroid="transparent"
+                  onChangeText={lname => this.setState({ lname })}
+                  value={this.state.lname}
+                />
+
+              </View>
+
+
+            </View>
+
+
+            <View style={{
+              flexDirection: "row",
+              justifyContent: "space-between", alignItems: "center",
+              marginTop: scale(10)
+            }}
+            >
+
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={styles.txt_h}>User Type</Text>
+                <Text style={{
+                  color: 'red', fontSize: scale(15),
+                  textAlignVertical: "center"
+                }}> *</Text>
+              </View>
+
+
+              <View style={styles.userInput}>
+              
+                <RNPickerSelect
+                  placeholder={{}}
+                  items={[
+                    { label: 'Admin', value: 'Admin' },
+                    { label: 'User', value: 'User' },
+
+                  ]}
+                  style={{
+                    inputIOS: styles.inputIOS,
+                    inputAndroid: styles.inputAndroid,
+                  }}
+                  onValueChange={(u_type) => {
+                    this.setState({ u_type: u_type })
+
+                  }}
+                  value={this.state.u_type}
+                />
+
+              </View>
+
+
+            </View>
+
+
+            <View style={{
+              flexDirection: "row",
+              justifyContent: "space-between", alignItems: "center",
+              marginTop: scale(10)
+            }}
+            >
+
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={styles.txt_h}>Email Id</Text>
+                <Text style={{
+                  color: 'red', fontSize: scale(15),
+                  textAlignVertical: "center"
+                }}> *</Text>
+              </View>
+
+
+              <View style={styles.userInput}>
+
+                <TextInput
+                  style={styles.input}
+                  keyboardType='email-address'
+                  autoCorrect={false}
+                  autoCapitalize={'none'}
+                  underlineColorAndroid="transparent"
+                  onChangeText={email_id => this.setState({ email_id })}
+                  value={this.state.email_id}
+                />
+
+              </View>
+
+
+            </View>
+
+
+            <View style={{
+              flexDirection: "row",
+              justifyContent: "space-between", alignItems: "center",
+              marginTop: scale(10)
+            }}
+            >
+
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={styles.txt_h}>Password</Text>
+                <Text style={{
+                  color: 'red', fontSize: scale(15),
+                  textAlignVertical: "center"
+                }}> *</Text>
+              </View>
+
+
+              <View style={styles.userInput}>
+
+                <TextInput
+                  secureTextEntry={true}
+
+                  style={styles.input}
+               
+                  autoCorrect={false}
+                  autoCapitalize={'none'}
+                  underlineColorAndroid="transparent"
+                  onChangeText={password => this.setState({ password })}
+                  value={this.state.password}
+           
+                />
+
+              </View>
+
+
+            </View>
+ 
+
+            <View style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginTop: scale(20),
+
+            }}>
+              <TouchableOpacity
+
+                style={{
+                  width: scale(90),
+                  height: scale(30),
+                  padding: scale(10),
+                  backgroundColor: Color.btn,
+                  borderRadius: scale(5),
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+
+                onPress={() => {
+                  this._addUser_fun()
+                }}
+              >
+                <Text style={{
+                  color: '#fff',
+                  fontSize: scale(15),
+
+                }}>{this.state.ed_id == "" ? "Save" : "Update"}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+
+                style={{
+                  width: scale(90),
+                  height: scale(30),
+                  padding: scale(10),
+                  backgroundColor: '#ddd',
+                  borderRadius: scale(5),
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginLeft: scale(20)
+
+                }}
+                onPress={() => {
+                  this.setState({
+                    addItem: false,
+                    fname: '',
+                    lname: '',
+                    u_type: 'Admin',
+                    email_id: '',
+                    password: '',
+                    ed_id: '',
+                  })
+                }}
+
+              
+
+
+              >
+                <Text style={{
+                  color: '#fff',
+                  fontSize: scale(15),
+                  textAlign: 'center'
+                }}>Cancel</Text>
+              </TouchableOpacity>
+
+            </View>
 
       </View>
       </ScrollView>
@@ -865,46 +983,7 @@ secureTextEntry
   )
 }
 
-renderFOB() {
-   
-    return (
-      <TouchableOpacity activeOpacity={0.5}
-        style={{
-          position: 'absolute',
-          width: scale(50),
-          height: scale(50),
-          alignItems: 'center',
-          justifyContent: 'center',
-          right: 30,
-          bottom: 30,
-          backgroundColor: "#fff",
-          borderRadius: scale(25),
-          elevation: 20,
-          shadowColor: "#000000",
-          shadowOpacity: 0.8,
-          shadowRadius: 2,
-          shadowOffset: {
-            height: 1,
-            width: 0
-          }
 
-        }}
-        onPress={() => {
-          this.setState({ addItem: true, ed_id: "" })
-        }}
-      >
-
-        <Image source={Images.add}
-
-          style={{
-            resizeMode: 'contain',
-            width: 25,
-            height: 25,
-          }} />
-
-      </TouchableOpacity>
-    );
-  }
 
   renderHeader() {
     return (
@@ -930,6 +1009,7 @@ renderFOB() {
       </View>
     )
   }
+
 
 
   renderTitle() {
@@ -1109,12 +1189,19 @@ return (
           width: '100%',
 
         }}
-        disabled={this.state.is_create?true:false}
+        disabled={this.state.is_create?false:true}
 
-          onPress={() => {
-          
-            this.setState({ addItem: true, ed_id: "" })
-          }}
+            onPress={() => {
+
+              this.setState({ addItem: true,
+                              ed_id: "",
+                fname: '',
+                lname: '',
+                
+                email_id: '',
+                password: '',
+               })
+            }}
 
 
         >
@@ -1231,47 +1318,60 @@ const styles = StyleSheet.create({
     bottom: 0
   },
 
-  txt: { fontSize: scale(12) },
-
   userInput: {
-    height: scale(40),
+    height: scale(42),
     backgroundColor: 'white',
-    marginBottom: scale(15),
-    borderColor: 'grey',
     borderWidth: scale(1),
-    width:scale(200),
-    borderRadius:scale(5)
-    },
+    width: scale(200),
+    justifyContent: "center",
+    borderRadius: scale(5),
+    borderColor: "#ddd"
 
-    input: {
-      color: '#000',
-      marginLeft: scale(5),
-      width: '73%',
-      fontSize: scale(12)
-      },
+  },
 
-      txt_h: {
-        fontSize: scale(12),
-        color: '#000',
-        fontWeight: 'bold',
-        width:scale(200),
-       textAlign:'left'
-        },    
-  
+  input: {
 
-        userInputTC: {
-          height: scale(100),
-          backgroundColor: 'white',
-          marginBottom: scale(15),
-          borderColor: 'grey',
-          borderWidth: scale(1),
-          width:scale(200),
-          },
 
-          inputTC: {
-            color: '#000',
-            fontSize: scale(12)
-            },
+
+    fontSize: scale(12)
+  },
+
+  txt_h: {
+    fontSize: scale(12),
+    color: '#000',
+    fontWeight: 'bold',
+    textAlign: 'left'
+  },
+
+
+  userInputTC: {
+    height: scale(60),
+    borderRadius: scale(5),
+    borderColor: '#ddd',
+    borderWidth: scale(1),
+    width: scale(200),
+  },
+
+  inputTC: {
+    color: '#000',
+    fontSize: scale(12)
+  },
+  inputIOS: {
+    fontSize: scale(12),
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(10),
+    color: 'black',
+    paddingRight: scale(40),
+  },
+  inputAndroid: {
+    fontSize: scale(12),
+    paddingHorizontal: scale(10),
+    paddingVertical: scale(8),
+    color: 'black',
+    paddingRight: scale(40),
+  },
+
+
   
  });
 

@@ -9,7 +9,8 @@ import {
   ScrollView,
   StyleSheet,
   Image, TouchableOpacity, RefreshControl, Modal, TextInput,Alert,
-  Dimensions, TouchableHighlight
+  Dimensions, TouchableHighlight,
+  NativeModules
 } from 'react-native';
 
 import { connect } from "react-redux";
@@ -31,6 +32,10 @@ import {
 } from "react-native-chart-kit";
 import ActionSheet from 'react-native-actionsheet';
 import Ripple from 'react-native-material-ripple';
+
+
+
+
 
 class HomeScreen extends PureComponent {
 
@@ -64,8 +69,13 @@ class HomeScreen extends PureComponent {
     }
   }
 
-  componentDidMount() {
+ 
 
+
+
+  componentDidMount() {
+  
+   
     const { network, user_id, user_type } = this.props;
     if (!network.isConnected) {
       Snackbar.show({
