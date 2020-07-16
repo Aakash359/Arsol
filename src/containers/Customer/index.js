@@ -6,7 +6,9 @@ import {
   Text,
   StyleSheet,
   Image,
-  TouchableHighlight
+  TouchableHighlight,
+  Dimensions,
+  ImageBackground
 } from 'react-native';
 
 import { NavigationBar } from '@components';
@@ -60,7 +62,7 @@ class CustomerScreen extends PureComponent {
       cust_id: '',
 
 
-      personal_info: false,
+      personal_info: true,
       other_details : false,
       billing : false,
       shipping : false,
@@ -114,7 +116,7 @@ class CustomerScreen extends PureComponent {
           sp_phone_add: '',
           sp_fax: '',
           remark: '',
-          personal_info: false,
+          personal_info: true,
           other_details: false,
           billing: false,
           shipping: false,
@@ -169,7 +171,7 @@ class CustomerScreen extends PureComponent {
               sp_phone_add: '',
               sp_fax: '',
               remark: '',
-              personal_info: false,
+              personal_info: true,
               other_details: false,
               billing: false,
               shipping: false,
@@ -190,30 +192,55 @@ class CustomerScreen extends PureComponent {
   _infoFunction = () => {
     this.setState(state => ({
       personal_info: !state.personal_info,
+   
+      other_details: false,
+      billing: false,
+      shipping: false,
+      remarks: false,
     }));
   };
 
   _otherFunction = () => {
     this.setState(state => ({
       other_details: !state.other_details,
+      personal_info: false,
+   
+      billing: false,
+      shipping: false,
+      remarks: false,
     }));
   };
 
   _billingFunction = () => {
     this.setState(state => ({
       billing: !state.billing,
+      personal_info: false,
+      other_details: false,
+ 
+      shipping: false,
+      remarks: false,
     }));
   };
 
   _shippingFunction = () => {
     this.setState(state => ({
       shipping: !state.shipping,
+      personal_info: false,
+      other_details: false,
+      billing: false,
+
+      remarks: false,
     }));
   };
 
   _remarksFunction = () => {
     this.setState(state => ({
       remarks: !state.remarks,
+      personal_info: false,
+      other_details: false,
+      billing: false,
+      shipping: false,
+    
     }));
   };
 
@@ -338,82 +365,77 @@ class CustomerScreen extends PureComponent {
       });
   }
 
+  renderHeader() {
+    return (
+      <View
+        style={{
+          backgroundColor: Color.bgColor,
+          borderRadius: scale(5),
+          justifyContent: "center",
+          alignItems: "center",
+          padding: scale(10),
+          width: scale(150),
+          alignSelf: 'center'
+        }}
+      >
+        <Text style={{
+          fontSize: scale(18),
+          color: '#000',
+
+        }}
+          numberOfLines={1}
+        >Item Details</Text>
+
+      </View>
+    )
+  }
 
   render() {
 
 
 
     return (
-      <View style={{ justifyContent: "center", flex: 1,backgroundColor: "#fff" }}>
+      <View>
+        <ImageBackground
+          style={[styles.fixed, styles.containter]}
+          source={Images.listbg}>
 
 
-<View
-        style={{
-          height: scale(50), backgroundColor: "#80d4ff",
+          <TouchableHighlight
+            activeOpacity={1}
+            underlayColor={'#ddd'}
+            onPress={() =>
+              this.props.navigation.toggleDrawer()}
+            style={{
+              width: scale(35), height: scale(35),
+              alignItems: "center",
+              justifyContent: 'center',
+              backgroundColor: Color.headerTintColor
+            }}
+          >
+            <Image source={Images.menu}
+              style={{
+                width: scale(20),
+                height: scale(20),
+              }} />
+          </TouchableHighlight>
 
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 9,
-          },
-          shadowOpacity: 0.48,
-          shadowRadius: 11.95,
-
-          elevation: 20,
-          borderRadius: scale(15),
-          margin: scale(7),
-          justifyContent: "center",
-          padding: scale(10)
-
-        }}
-      >
-
-
-
-        <TouchableHighlight
-          activeOpacity={1}
-          underlayColor={'#ddd'}
-          onPress={() => this.props.navigation.goBack()}
-          style={{
-            width: scale(40), height: scale(40),
-
-
-
-            alignItems: "center",
-            justifyContent: 'center',
-            borderRadius: scale(20)
-          }}
-        >
-
-          <Image source={Images.backwhite} style={{
-            width: scale(30), height: scale(30),
-
-
-          }} />
-
-        </TouchableHighlight>
-
-        <Text style={{
-          position: "absolute",
-          alignSelf: "center",
-          fontSize: scale(18),
-          color: "#fff",
-          fontWeight: 'bold'
-        }}>Customer</Text>
-
-      </View>
+          {this.renderHeader()}
 
         <ScrollView>
 
-          <View style={{ margin: scale(10), padding: scale(10) }}>
+          <View style={{ margin: scale(10) }}>
             
-            <View style={{ height: scale(50), justifyContent: 'center',
-    borderColor: '#3498DB', borderWidth: scale(2), backgroundColor:'#D5DBDB', borderRadius:scale(5)}}>
+              <View style={styles.btnView}>
 
-              <View style={{ flexDirection: "row", justifyContent:'space-between', margin: scale(10)  }}>
-                <Text style={{ fontWeight: 'bold', fontSize: scale(15),color:'#CB4335' }}>PERSONAL INFO</Text>
+              <View style={{ flexDirection: "row",
+               justifyContent:'space-between',
+               }}>
+                <Text style={styles.btnText}
+                    numberOfLines={1}
+                >PERSONAL INFO</Text>
                 <TouchableOpacity onPress={() => this._infoFunction()}>
-                  <Image source={Images.expand}
+                    <Image source={this.state.personal_info ? Images.downarrow:Images.next}
                     style={{
                       width: scale(30),
                       height: scale(30),
@@ -426,54 +448,71 @@ class CustomerScreen extends PureComponent {
 
             {this.state.personal_info ?
 
-              <View style={{width:scale(300) }}>
+              <View>
 
                 <View style={{ marginTop: scale(15), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Primary Contact :</Text>
-                  <Text style={styles.txt}>{this.state.primary_contact} {this.state.fname} {this.state.lname}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Primary Contact :</Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}>{this.state.primary_contact} {this.state.fname} {this.state.lname}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Company Name :</Text>
-                  <Text style={styles.txt}> {this.state.company_name}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}
+                  >Company Name :</Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.company_name}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Display Name :</Text>
-                  <Text style={styles.txt}> {this.state.display_name}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Display Name :</Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.display_name}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Contact Email :</Text>
-                  <Text style={styles.txt}> {this.state.contact_email}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Contact Email :</Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.contact_email}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>GST Number :</Text>
-                  <Text style={styles.txt}> {this.state.gst_no}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>GST Number :</Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.gst_no}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Contact Phone :</Text>
-                  <Text style={styles.txt}> {this.state.phone}  {this.state.mobile}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Contact Phone :</Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.phone}  {this.state.mobile}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Website : </Text>
-                  <Text style={styles.txt}> {this.state.website}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}
+                  >Website : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.website}</Text>
                 </View>
 
               </View>
               : null
             }
 
-<View style={{ height: scale(50), justifyContent: 'center',
-    borderColor: '#3498DB', borderWidth: scale(2), marginTop: scale(15),backgroundColor:'#D5DBDB',borderRadius:scale(5) }}>
+              <View style={styles.btnView}>
 
-              <View style={{ flexDirection: "row", justifyContent:'space-between', margin: scale(10)  }}>
-                <Text style={{ fontWeight: 'bold', fontSize: scale(15),color:'#CB4335' }}>OTHER DETAILS</Text>
+              <View style={{ flexDirection: "row", 
+              justifyContent:'space-between',  }}>
+                  <Text style={styles.btnText}
+                    numberOfLines={1}>OTHER DETAILS</Text>
                 <TouchableOpacity onPress={() => this._otherFunction()}>
-                  <Image source={Images.expand}
+                    <Image source={this.state.other_details ? Images.downarrow : Images.next}
                     style={{
                      
                       width: scale(30),
@@ -490,41 +529,54 @@ class CustomerScreen extends PureComponent {
               <View style={{width:scale(300) }}>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Currency : </Text>
-                  <Text style={styles.txt}> {this.state.currency}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Currency : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.currency}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Payment Terms : </Text>
-                  <Text style={styles.txt}> {this.state.pay_term}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Payment Terms : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.pay_term}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Language : </Text>
-                  <Text style={styles.txt}> {this.state.lang}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Language : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.lang}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Facebook : </Text>
-                  <Text style={styles.txt}> {this.state.fb}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Facebook : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.fb}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Twitter : </Text>
-                  <Text style={styles.txt}> {this.state.twitter}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Twitter : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.twitter}</Text>
                 </View>
 
               </View>
               : null
             }
 
-<View style={{ height: scale(50), justifyContent: 'center',
-    borderColor: '#3498DB', borderWidth: scale(2), marginTop: scale(15),backgroundColor:'#D5DBDB',borderRadius:scale(5) }}>
+              <View style={styles.btnView}>
 
-              <View style={{ flexDirection: "row", justifyContent:'space-between', margin: scale(10)  }}>
-                <Text style={{ fontWeight: 'bold', fontSize: scale(15),color:'#CB4335'  }}>BILLING ADDRESS</Text>
+                <View style={{
+                  flexDirection: "row",
+                  justifyContent: 'space-between',
+                }}>
+                  <Text style={styles.btnText}
+                    numberOfLines={1}>BILLING ADDRESS</Text>
                 <TouchableOpacity onPress={() => this._billingFunction()}>
-                  <Image source={Images.expand}
+                    <Image source={this.state.billing ? Images.downarrow : Images.next}
                     style={{
                       
                       width: scale(30),
@@ -541,38 +593,52 @@ class CustomerScreen extends PureComponent {
               <View style={{width:scale(300) }}>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Country : </Text>
-                  <Text style={styles.txt}> {this.state.country}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Country : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.country}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Address : </Text>
-                  <Text style={styles.txt}> {this.state.address}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Address : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.address}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>City : </Text>
-                  <Text style={styles.txt}> {this.state.city}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>City : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.city}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>State : </Text>
-                  <Text style={styles.txt}> {this.state.state}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>State : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.state}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Zipcode : </Text>
-                  <Text style={styles.txt}> {this.state.zipcode}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Zipcode : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.zipcode}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Phone : </Text>
-                  <Text style={styles.txt}> {this.state.phone_add}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Phone : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={1}> {this.state.phone_add}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Fax : </Text>
-                  <Text style={styles.txt}> {this.state.fax}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Fax : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.fax}</Text>
                 </View>
 
               </View>
@@ -580,13 +646,16 @@ class CustomerScreen extends PureComponent {
             }
 
 
-<View style={{ height: scale(50), justifyContent: 'center',
-    borderColor: '#3498DB', borderWidth: scale(2), marginTop: scale(15),backgroundColor:'#D5DBDB',borderRadius:scale(5) }}>
+              <View style={styles.btnView}>
 
-              <View style={{ flexDirection: "row", justifyContent:'space-between', margin: scale(10)  }}>
-                <Text style={{ fontWeight: 'bold', fontSize: scale(15) ,color:'#CB4335'}}>SHIPPING ADDRESS</Text>
+                <View style={{
+                  flexDirection: "row",
+                  justifyContent: 'space-between',
+                }}>
+                  <Text style={styles.btnText}
+                    numberOfLines={1}>SHIPPING ADDRESS</Text>
                 <TouchableOpacity onPress={() => this._shippingFunction()}>
-                  <Image source={Images.expand}
+                    <Image source={this.state.shipping ? Images.downarrow : Images.next}
                     style={{
                       
                       width: scale(30),
@@ -604,13 +673,17 @@ class CustomerScreen extends PureComponent {
               <View style={{width:scale(300) }}>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Country : </Text>
-                  <Text style={styles.txt}> {this.state.sp_country}</Text>
+                  <Text style={styles.ctxt}
+                  numberOfLines={1}>Country : </Text>
+                  <Text style={styles.txt}>
+                      numberOfLines={2} {this.state.sp_country}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Address : </Text>
-                  <Text style={styles.txt}> {this.state.sp_address}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Address : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.sp_address}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
@@ -619,36 +692,47 @@ class CustomerScreen extends PureComponent {
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>State : </Text>
-                  <Text style={styles.txt}> {this.state.sp_state}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>State : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.sp_state}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Zipcode : </Text>
-                  <Text style={styles.txt}> {this.state.sp_zipcode}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Zipcode : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.sp_zipcode}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Phone : </Text>
-                  <Text style={styles.txt}> {this.state.sp_phone_add}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Phone : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.sp_phone_add}</Text>
                 </View>
 
                 <View style={{ marginTop: scale(5), flexDirection: 'row' }}>
-                  <Text style={styles.ctxt}>Fax : </Text>
-                  <Text style={styles.txt}> {this.state.sp_fax}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Fax : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.sp_fax}</Text>
                 </View>
 
               </View>
               : null
             }
 
-<View style={{ height: scale(50), justifyContent: 'center',
-    borderColor: '#3498DB', borderWidth: scale(2), marginTop: scale(15),backgroundColor:'#D5DBDB',borderRadius:scale(5) }}>
+              <View style={styles.btnView}>
 
-              <View style={{ flexDirection: "row", justifyContent:'space-between', margin: scale(10)  }}>
-                <Text style={{ fontWeight: 'bold', fontSize: scale(15),color:'#CB4335' }}>REMARKS</Text>
+                <View style={{
+                  flexDirection: "row",
+                  justifyContent: 'space-between',
+                }}>
+                  <Text style={styles.btnText}
+                    numberOfLines={1}>REMARKS</Text>
                 <TouchableOpacity onPress={() => this._remarksFunction()}>
-                  <Image source={Images.expand}
+                    <Image source={this.state.remarks ? Images.downarrow : Images.next}
                     style={{
                      
                       width: scale(30),
@@ -665,8 +749,10 @@ class CustomerScreen extends PureComponent {
               <View style={{width:scale(300) }}>
 
                 <View style={{ marginTop: scale(5), marginBottom: scale(80), flexDirection: 'row', width: '80%' }}>
-                  <Text style={styles.ctxt}>Remarks : </Text>
-                  <Text style={styles.txt}> {this.state.remark}</Text>
+                  <Text style={styles.ctxt}
+                      numberOfLines={1}>Remarks : </Text>
+                  <Text style={styles.txt}
+                      numberOfLines={2}> {this.state.remark}</Text>
                 </View>
 
               </View>
@@ -684,7 +770,8 @@ class CustomerScreen extends PureComponent {
 
 
 
-      </View>
+    </ImageBackground>
+    </View>
     );
   }
 }
@@ -694,13 +781,42 @@ const styles = StyleSheet.create({
   ctxt: {
     fontSize: scale(12),
     fontWeight: 'bold',
-    //color: '#707070'
+    width:scale(100)
+   
   },
 
   txt: {
     fontSize: scale(12),
+    width: scale(200)
 
-  }
+  },
+  containter: {
+    width: Dimensions.get("window").width, //for full screen
+    height: Dimensions.get("window").height //for full screen
+  },
+  fixed: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0
+  },
+
+  btnView:{
+    height: scale(50),
+    justifyContent: 'center',
+    borderColor: Color.headerTintColor,
+    borderWidth: scale(2),
+    borderRadius: scale(5),
+    backgroundColor: "#fff",
+    padding: scale(5),
+    marginVertical:scale(10)
+  },
+  btnText: {
+    textAlign: 'center',
+    width: scale(200),
+    fontSize: scale(15),
+    textAlignVertical: 'center'}
 });
 
 
