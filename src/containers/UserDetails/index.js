@@ -33,7 +33,7 @@ class UserDetailsScreen extends PureComponent {
       show_list:[],
       fname:'',
       lname:'',
-      u_type:'Admin',
+      u_type:'User',
       email_id:'',
       password:'',
       ed_id: "",
@@ -60,7 +60,7 @@ class UserDetailsScreen extends PureComponent {
       show_list: [],
       fname: '',
       lname: '',
-      u_type: 'Admin',
+      u_type: 'User',
       email_id: '',
       password: '',
       is_create:true
@@ -84,7 +84,7 @@ class UserDetailsScreen extends PureComponent {
             show_list: [],
             fname: '',
             lname: '',
-            u_type: 'Admin',
+            u_type: 'User',
             email_id: '',
             password: '',
             is_create: true
@@ -301,7 +301,7 @@ ed_id)
                       this.setState({
                         fname: "",
                         lname: "",
-                        u_type: "Admin",
+                        u_type: "User",
                         email_id: "",
                         password: "",
                       }, () => {
@@ -811,15 +811,16 @@ _addUserRender(){
               </View>
 
 
-              <View style={styles.userInput}>
+              <View style={[styles.userInput, { backgroundColor: this.state.ed_id == "" ? "#fff" : "#ddd"}]}>
               
                 <RNPickerSelect
                   placeholder={{}}
-                  items={[
-                    { label: 'Admin', value: 'Admin' },
-                    { label: 'User', value: 'User' },
-
-                  ]}
+                  items={
+                    this.state.ed_id == "" ?
+                    [{ label: 'User', value: 'User' }
+                      ] : [{ label: 'Admin', value: 'Admin' },
+                      { label: 'User', value: 'User' }
+                      ]}
                   style={{
                     inputIOS: styles.inputIOS,
                     inputAndroid: styles.inputAndroid,
@@ -829,6 +830,7 @@ _addUserRender(){
 
                   }}
                   value={this.state.u_type}
+                  disabled={this.state.ed_id == "" ? false: true}
                 />
 
               </View>
@@ -853,7 +855,9 @@ _addUserRender(){
               </View>
 
 
-              <View style={styles.userInput}>
+              <View style={[styles.userInput,{
+                backgroundColor: this.state.ed_id == "" ?"#fff":"#ddd"
+              }]}>
 
                 <TextInput
                   style={styles.input}
@@ -863,6 +867,7 @@ _addUserRender(){
                   underlineColorAndroid="transparent"
                   onChangeText={email_id => this.setState({ email_id })}
                   value={this.state.email_id}
+                  editable={this.state.ed_id == "" ?true:false}
                 />
 
               </View>
@@ -955,7 +960,7 @@ _addUserRender(){
                     addItem: false,
                     fname: '',
                     lname: '',
-                    u_type: 'Admin',
+                    u_type: 'User',
                     email_id: '',
                     password: '',
                     ed_id: '',
@@ -1325,7 +1330,9 @@ const styles = StyleSheet.create({
     width: scale(200),
     justifyContent: "center",
     borderRadius: scale(5),
-    borderColor: "#ddd"
+    borderColor: "#ddd",
+    padding:scale(5)
+    
 
   },
 

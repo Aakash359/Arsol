@@ -499,10 +499,7 @@ class ManageSubscriptionScreen extends PureComponent {
             }}
               numberOfLines={1}
             >
-            {item.plan_id == 1 ?"Default" : 
-                item.plan_id == 2 ?"Current Plan" : 
-                  item.plan_id == 3 ? "Upgrade Now":
-                    item.plan_id == 4 ? "Excusive":""}</Text>
+            {item.btn_text}</Text>
           </TouchableOpacity>
 
         </View>
