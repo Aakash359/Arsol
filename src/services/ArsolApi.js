@@ -957,9 +957,9 @@ const ArsolApi = {
     let body = new FormData();
     body.append('user_id', user_id);
     body.append('user_type', user_type);
-    body.append('fname', fname);
-    body.append('lname', lname);
-    body.append('u_type', u_type);
+     body.append('f_name', fname);
+     body.append('l_name', lname);
+     body.append('type_user', u_type);
     body.append('email_id', email_id);
     body.append('password', password);
     body.append('edit_id', edit_id);
